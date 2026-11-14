@@ -1,0 +1,58 @@
+{
+  "name": "edu-browser",
+  "version": "0.1.0",
+  "description": "Навчальний тренажер «Браузер»: вкладки, адреси, закладки й історія на вигаданих безпечних сайтах для 3–6 класу",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "build:lib": "vite build -c vite.lib.config.ts && tsc -p tsconfig.lib.json",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.7",
+    "@vitejs/plugin-react": "6.1.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "typescript": "6.0.3",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zavada123/edu-browser.git"
+  },
+  "files": [
+    "lib"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./core": {
+      "types": "./lib/types/core.d.ts",
+      "import": "./lib/core.js"
+    },
+    "./react": {
+      "types": "./lib/types/react.d.ts",
+      "import": "./lib/react.js"
+    },
+    "./style.css": "./lib/style.css"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  }
+}
