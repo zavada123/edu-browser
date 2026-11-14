@@ -30,7 +30,8 @@ It follows the same model as [edu-desktop](https://github.com/zavada123/edu-desk
 - **Address bar:** takes an address or a search query; Cyrillic addresses (`казки.edu`) and Latin aliases (`kazky.edu`); a "site not found" page for typos.
 - **Bookmarks:** the star dialog with name and folder, a new folder from the dialog, the bookmarks bar with folders, a bookmark manager (rename, move, delete).
 - **History:** grouped by day, search in history, delete one entry, clear all with a confirmation.
-- **A search site** that finds pages by keywords, and a new-tab page with tiles.
+- **A search site** that finds pages by keywords, with adverts on top, and a new-tab page with tiles.
+- **Safety lessons:** popup windows with a tempting button and a small ✕, a chat where a stranger asks for a password (with «Поскаржитися»), a bait site with a form for personal data, downloads with an antivirus warning, and the 🙋 «Покликати дорослого» button. Forms send nothing and nothing the student types is kept: only the press is recorded.
 - **Made-up sites as data:** a page is a list of blocks (heading, text with links, photo with author, links, list, table, banner, search). No HTML from data, no iframes, no network.
 - **Large mode** for grades 3–4, a **phone layout** with a tab list, and **full screen**.
 - **Tamper-proof grading:** the server replays the log and checks every step was possible (a "link" step must be a link on that page, a "history" step must be in history).
@@ -40,6 +41,7 @@ It follows the same model as [edu-desktop](https://github.com/zavada123/edu-desk
 | Grade | Lesson | Task |
 |---|---|---|
 | 3 | inf3-09 | Мандрівка посиланнями · Назад і вперед · Адреса казок · Сайт чи сторінка? |
+| 3 | inf3-10 | Котик просить пароль · Твій приз — телефон! · Безпечний чи підозрілий? · Файл гри з вірусом |
 | 4 | inf3-11 | Перша закладка · Папка закладок · Знайди в історії |
 | 5 | — | Пошук за ключовими словами · Вкладки до ладу · Прибери за собою |
 
@@ -98,7 +100,7 @@ if (!result.ok) {
 }
 ```
 
-A log is limited to 500 steps, 20 tabs, 100 bookmarks and 20 folders.
+A log is limited to 500 steps, 20 tabs, 100 bookmarks, 20 folders and 50 downloads.
 
 ## API
 
@@ -112,7 +114,9 @@ A log is limited to 500 steps, 20 tabs, 100 bookmarks and 20 folders.
 
 ### Steps
 
-`navigate` (with `how`: `typed`, `link`, `bookmark`, `history`, `home`), `back`, `forward`, `reload`, `newTab`, `closeTab`, `switchTab`, `addBookmark`, `renameBookmark`, `moveBookmark`, `deleteBookmark`, `addFolder`, `deleteHistory`, `clearHistory`.
+`navigate` (with `how`: `typed`, `link`, `bookmark`, `history`, `home`), `back`, `forward`, `reload`, `newTab`, `closeTab`, `switchTab`, `addBookmark`, `renameBookmark`, `moveBookmark`, `deleteBookmark`, `addFolder`, `deleteHistory`, `clearHistory`, `submitForm`, `report`, `callAdult`, `closePopup`, `acceptPopup`, `download`, `deleteDownload`, `openDownload`.
+
+While a popup is open, only its buttons and `callAdult` are possible, as on the screen.
 
 ### Goals
 
@@ -121,14 +125,18 @@ Every goal accepts its own `text` and a `hint` shown when it is not met.
 | `type` | Checks that |
 |---|---|
 | `activeTab` | The page in front is this address; optionally reached this way (`how`: `link`, `typed`, `back`, `history`…) |
+| `activeSite` | The page in front is any page of this site |
 | `tabOpen` / `tabCount` | A tab shows this page / there are exactly N tabs |
 | `siteTabs` | At least N tabs show different pages of one site |
 | `visited` / `notVisited` | The student opened / never opened the page (a bare host covers the whole site) |
 | `searched` | The student searched for words on the search site |
-| `used` | The student used an action: `back`, `forward`, `reload`, `newTab`, `closeTab`, `home`, `deleteHistory`, `clearHistory` |
+| `used` | The student used an action: `back`, `forward`, `reload`, `newTab`, `closeTab`, `home`, `deleteHistory`, `clearHistory`, `callAdult`, `report` |
 | `bookmark` / `noBookmark` | A bookmark for the page exists (optionally in a folder, with a title) / does not |
 | `folder` | A bookmark folder exists |
 | `historyHas` / `historyHasNot` / `historyCount` | History holds / does not hold the page / holds N entries |
+| `submitted` / `notSubmitted` | The form or chat with this id was / was not sent |
+| `popupClosed` | The popup was closed without its tempting button |
+| `downloaded` / `downloadDeleted` / `notOpened` | The file was downloaded / deleted / never opened |
 
 ## Development
 

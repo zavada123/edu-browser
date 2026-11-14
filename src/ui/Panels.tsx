@@ -95,7 +95,7 @@ export const TabsPanel = ({ web, browser, dispatch }: { readonly web: Web; reado
   </div>
 )
 
-const PANEL_TITLES: Readonly<Record<Panel, string>> = { history: "🕘 Історія", bookmarks: "📑 Закладки", tabs: "Вкладки" }
+const PANEL_TITLES: Readonly<Record<Panel, string>> = { history: "🕘 Історія", bookmarks: "📑 Закладки", tabs: "Вкладки", downloads: "⬇ Завантаження" }
 
 export const SidePanel = ({ panel, onClose, children }: { readonly panel: Panel; readonly onClose: () => void; readonly children: ReactNode }) => (
   <section className={`eb-panel eb-panel--${panel}`} aria-label={PANEL_TITLES[panel]}>

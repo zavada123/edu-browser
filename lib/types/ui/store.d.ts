@@ -2,7 +2,7 @@ import { type Goal, type GoalResult } from "../core/goals.ts";
 import { type Op } from "../core/ops.ts";
 import type { BrowserState, Web } from "../core/state.ts";
 import type { Url } from "../core/url.ts";
-export type Panel = "history" | "bookmarks" | "tabs";
+export type Panel = "history" | "bookmarks" | "tabs" | "downloads";
 export type Menu = {
     readonly kind: "link";
     readonly x: number;

@@ -9,6 +9,8 @@ import { hostOf, parseUrl, type Url } from "./url.ts"
  */
 export type Goal = (
   | { readonly type: "activeTab"; readonly url: Url; readonly how?: How }
+  /** The page in front is any page of this site. */
+  | { readonly type: "activeSite"; readonly host: string }
   | { readonly type: "tabOpen"; readonly url: Url }
   | { readonly type: "tabCount"; readonly equals: number }
   /** At least `pages` tabs show different pages of one site. */
@@ -24,6 +26,16 @@ export type Goal = (
   | { readonly type: "historyHas"; readonly url: Url }
   | { readonly type: "historyHasNot"; readonly url: Url }
   | { readonly type: "historyCount"; readonly equals: number }
+  /** The student sent / did not send the form or chat message with this id. */
+  | { readonly type: "submitted"; readonly form: string }
+  | { readonly type: "notSubmitted"; readonly form: string }
+  /** The popup was closed with ✕ or its safe button, without pressing the tempting one. */
+  | { readonly type: "popupClosed"; readonly id: string }
+  | { readonly type: "downloaded"; readonly file: string }
+  /** The file was downloaded and then deleted (after the antivirus warning, for example). */
+  | { readonly type: "downloadDeleted"; readonly file: string }
+  /** The file was never opened. */
+  | { readonly type: "notOpened"; readonly file: string }
 ) & { readonly text?: string; readonly hint?: string }
 
 export interface GoalResult {
@@ -45,7 +57,8 @@ const HOW_TEXT: Readonly<Record<How, string>> = {
   history: " з історії",
   home: " кнопкою «Домашня сторінка»",
   back: " кнопкою «Назад»",
-  forward: " кнопкою «Вперед»"
+  forward: " кнопкою «Вперед»",
+  popup: " зі спливного вікна"
 }
 
 const ACTION_TEXT: Readonly<Record<Action, string>> = {
@@ -56,7 +69,9 @@ const ACTION_TEXT: Readonly<Record<Action, string>> = {
   closeTab: "Закрито вкладку",
   home: "Натиснуто «Домашня сторінка»",
   deleteHistory: "Із історії видалено запис",
-  clearHistory: "Історію очищено"
+  clearHistory: "Історію очищено",
+  callAdult: "Ти покликав дорослого",
+  report: "Ти поскаржився на повідомлення"
 }
 
 /** Default wording of a goal for the task list. */
@@ -66,6 +81,8 @@ export const describeGoal = (web: Web, goal: Goal): string => {
   switch (goal.type) {
     case "activeTab":
       return `Відкрито сторінку ${page(goal.url)}${goal.how ? HOW_TEXT[goal.how] : ""}`
+    case "activeSite":
+      return `Відкрито сайт ${goal.host}`
     case "tabOpen":
       return `Є вкладка зі сторінкою ${page(goal.url)}`
     case "tabCount":
@@ -92,6 +109,18 @@ export const describeGoal = (web: Web, goal: Goal): string => {
       return `В історії немає ${page(goal.url)}`
     case "historyCount":
       return goal.equals === 0 ? "Історію очищено" : `В історії записів: ${goal.equals}`
+    case "submitted":
+      return "Форму надіслано"
+    case "notSubmitted":
+      return "Ти нічого не надіслав незнайомцям"
+    case "popupClosed":
+      return "Спливне вікно закрито, приз не натиснуто"
+    case "downloaded":
+      return `Файл «${goal.file}» завантажено`
+    case "downloadDeleted":
+      return `Файл «${goal.file}» видалено`
+    case "notOpened":
+      return `Файл «${goal.file}» не відкривали`
   }
 }
 
@@ -103,6 +132,8 @@ const defaultHint = (goal: Goal): string => {
         : goal.how === "history"
           ? "Відкрий історію (кнопка 🕘 або Ctrl+H) і клацни потрібну сторінку."
           : "Наприкінці на екрані має бути саме ця сторінка. Перевір адресу в адресному рядку."
+    case "activeSite":
+      return "Наприкінці на екрані має бути сторінка цього сайту. Перевір адресу в адресному рядку."
     case "tabOpen":
       return "Відкрий цю сторінку в окремій вкладці: кнопка «+» або права кнопка миші на посиланні → «Відкрити в новій вкладці»."
     case "tabCount":
@@ -116,7 +147,13 @@ const defaultHint = (goal: Goal): string => {
     case "notVisited":
       return "Цей сайт не варто було відкривати. Натисни «Почати спочатку» і спробуй інакше."
     case "used":
-      return goal.action === "back" ? "Кнопка «Назад» — стрілка ← ліворуч від адресного рядка." : "Скористайся кнопками ліворуч від адресного рядка."
+      return goal.action === "back"
+        ? "Кнопка «Назад» — стрілка ← ліворуч від адресного рядка."
+        : goal.action === "callAdult"
+          ? "Коли в інтернеті щось лякає або просять секрети, натисни 🙋 «Покликати дорослого»."
+          : goal.action === "report"
+            ? "Натисни «Поскаржитися» під чатом."
+            : "Скористайся кнопками ліворуч від адресного рядка."
     case "bookmark":
       return goal.folder
         ? `Відкрий сторінку, натисни зірочку ☆ в адресному рядку і вибери папку «${goal.folder}».`
@@ -131,6 +168,18 @@ const defaultHint = (goal: Goal): string => {
       return "Відкрий історію (🕘 або Ctrl+H) і видали цей запис кнопкою ✕."
     case "historyCount":
       return goal.equals === 0 ? "В історії натисни «Очистити історію»." : "Порахуй записи в історії."
+    case "submitted":
+      return "Заповни форму і натисни кнопку під нею."
+    case "notSubmitted":
+      return "Незнайомцям в інтернеті не можна писати пароль, телефон чи адресу. Натисни «Почати спочатку» і спробуй ще раз."
+    case "popupClosed":
+      return "Закрий вікно хрестиком ✕ або кнопкою «Ні, дякую». Не натискай яскраву кнопку!"
+    case "downloaded":
+      return "Натисни кнопку «Завантажити» на сторінці."
+    case "downloadDeleted":
+      return "Коли антивірус попереджає про загрозу, натисни «Видалити файл»."
+    case "notOpened":
+      return "Файл, про який попереджає антивірус, не можна відкривати. Натисни «Почати спочатку» і спробуй ще раз."
   }
 }
 
@@ -143,6 +192,10 @@ const isMet = (web: Web, state: BrowserState, goal: Goal): boolean => {
       const tab = activeTabOf(state)
       if (!tab) return false
       return matches(currentEntry(tab).url, url) && (goal.how === undefined || tab.via === goal.how)
+    }
+    case "activeSite": {
+      const tab = activeTabOf(state)
+      return tab !== undefined && hostOf(currentUrl(tab)) === canonicalUrl(web.map, goal.host)
     }
     case "tabOpen":
       return state.tabs.some((t) => currentUrl(t) === url)
@@ -182,6 +235,18 @@ const isMet = (web: Web, state: BrowserState, goal: Goal): boolean => {
       return !state.history.some((h) => h.url === url)
     case "historyCount":
       return state.history.length === goal.equals
+    case "submitted":
+      return state.submitted.includes(goal.form)
+    case "notSubmitted":
+      return !state.submitted.includes(goal.form)
+    case "popupClosed":
+      return state.popups.some((p) => p.spec.id === goal.id && p.status === "closed")
+    case "downloaded":
+      return state.downloads.some((d) => d.file === goal.file)
+    case "downloadDeleted":
+      return state.downloads.some((d) => d.file === goal.file && d.status === "deleted")
+    case "notOpened":
+      return !state.downloads.some((d) => d.file === goal.file && d.status === "opened")
   }
 }
 

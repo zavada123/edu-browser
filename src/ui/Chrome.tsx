@@ -138,7 +138,7 @@ interface ToolbarProps {
 export const Toolbar = ({ web, browser, tab, large, addressRef, dispatch, full, onFull }: ToolbarProps) => {
   const url = currentUrl(tab)
   const bookmarked = browser.bookmarks.some((b) => b.url === url)
-  const panel = (p: "history" | "bookmarks" | "tabs") => dispatch({ type: "panel", panel: p })
+  const panel = (p: "history" | "bookmarks" | "tabs" | "downloads") => dispatch({ type: "panel", panel: p })
   return (
     <div className="eb-toolbar">
       <button type="button" className="eb-tool" disabled={tab.index === 0} onClick={() => dispatch({ type: "op", op: { op: "back" } })} aria-label="Назад" title="Назад (Alt+←)">
@@ -147,7 +147,7 @@ export const Toolbar = ({ web, browser, tab, large, addressRef, dispatch, full, 
       <button type="button" className="eb-tool eb-forward" disabled={tab.index >= tab.stack.length - 1} onClick={() => dispatch({ type: "op", op: { op: "forward" } })} aria-label="Вперед" title="Вперед (Alt+→)">
         →
       </button>
-      <button type="button" className="eb-tool" onClick={() => dispatch({ type: "op", op: { op: "reload" } })} aria-label="Оновити" title="Оновити (F5)">
+      <button type="button" className="eb-tool eb-reload" onClick={() => dispatch({ type: "op", op: { op: "reload" } })} aria-label="Оновити" title="Оновити (F5)">
         ⟳
       </button>
       <button type="button" className="eb-tool eb-home" onClick={() => dispatch({ type: "op", op: { op: "navigate", url: browser.home, how: "home" } })} aria-label="Домашня сторінка" title="Домашня сторінка">
@@ -166,6 +166,14 @@ export const Toolbar = ({ web, browser, tab, large, addressRef, dispatch, full, 
       </button>
       <button type="button" className="eb-tool" onClick={() => panel("history")} aria-label="Історія" title="Історія (Ctrl+H)">
         🕘
+      </button>
+      {browser.downloads.length > 0 && (
+        <button type="button" className="eb-tool" onClick={() => panel("downloads")} aria-label="Завантаження" title="Завантаження">
+          ⬇
+        </button>
+      )}
+      <button type="button" className="eb-tool eb-adult" onClick={() => dispatch({ type: "op", op: { op: "callAdult" } })} aria-label="Покликати дорослого" title="Покликати дорослого">
+        🙋
       </button>
       {!large && (
         <button type="button" className="eb-tool" onClick={() => panel("bookmarks")} aria-label="Менеджер закладок" title="Менеджер закладок">

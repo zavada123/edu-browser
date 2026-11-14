@@ -43,7 +43,38 @@ export type Block = {
 } | {
     readonly type: "note";
     readonly text: string;
+}
+/**
+ * A form that asks for something. It sends nothing anywhere: the trainer only records that the student
+ * pressed the button, never what they typed.
+ */
+ | {
+    readonly type: "form";
+    readonly id: string;
+    readonly title: string;
+    readonly fields: ReadonlyArray<string>;
+    readonly button: string;
+}
+/** A chat with scripted messages; the student can write, or report the writer to the site. */
+ | {
+    readonly type: "chat";
+    readonly id: string;
+    readonly title: string;
+    readonly messages: ReadonlyArray<ChatMessage>;
+    readonly reply?: string;
+}
+/** A file to download. `virus: true` makes the antivirus warn about it. */
+ | {
+    readonly type: "download";
+    readonly file: string;
+    readonly label: string;
+    readonly size: string;
+    readonly virus?: boolean;
 };
+export interface ChatMessage {
+    readonly from: string;
+    readonly text: string;
+}
 export interface LinkItem {
     readonly text: string;
     readonly url: Url;
@@ -54,6 +85,8 @@ export interface Page {
     readonly blocks: ReadonlyArray<Block>;
     /** Words the search site finds this page by. */
     readonly keywords?: ReadonlyArray<string>;
+    /** The search site shows this page as «Реклама» above the results for these words. */
+    readonly adKeywords?: ReadonlyArray<string>;
 }
 export interface Site {
     /** `космос.edu` */
@@ -74,6 +107,8 @@ export interface Site {
 export type SiteMap = Readonly<Record<string, Site>>;
 export declare const SEARCH_HOST = "\u043F\u043E\u0448\u0443\u043A.edu";
 export declare const SEARCH_PATH = "\u043F\u043E\u0448\u0443\u043A";
+/** The sites on the new-tab page: the safe ones the class knows, without the search site itself. */
+export declare const tileSites: (sites: ReadonlyArray<Site>) => ReadonlyArray<Site>;
 export declare const searchUrl: (query: string) => Url;
 export declare const siteMap: (sites: ReadonlyArray<Site>) => SiteMap;
 /** The address with the site's real host: `kosmos.edu/місяць` → `космос.edu/місяць`. */
@@ -111,11 +146,18 @@ export interface SearchHit {
     readonly title: string;
     readonly site: Site;
     readonly snippet: string;
+    /** Paid: shown first and marked «Реклама». */
+    readonly ad?: boolean;
 }
-/** Pages whose title or keywords hold every word of the query, best first. Hosts sorted for a stable order. */
+/**
+ * Adverts for the query first, then pages whose title or keywords hold every word of the query, best first.
+ * Hosts sorted for a stable order.
+ */
 export declare const search: (sites: ReadonlyArray<Site>, query: string) => ReadonlyArray<SearchHit>;
 /**
  * Every address a student can reach by a click on this page: links in its blocks, in the site header,
  * and search results. The server checks a «link» step against this list.
  */
 export declare const linksOn: (sitesList: ReadonlyArray<Site>, sites: SiteMap, url: Url) => ReadonlyArray<Url>;
+/** The blocks of the page at `url`, or none for the new-tab page and pages that do not exist. */
+export declare const blocksOn: (sites: SiteMap, url: Url) => ReadonlyArray<Block>;

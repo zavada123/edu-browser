@@ -1060,6 +1060,278 @@
   font-size: 0.85em;
 }
 
+/* ── Safety: forms, chat, downloads, popups, antivirus ───────── */
+
+.eb-form {
+  display: grid;
+  gap: 10px;
+  max-width: 420px;
+  margin: 0 0 16px;
+  padding: 16px;
+  border: 3px dashed #db2777;
+  border-radius: 12px;
+  background: #fdf2f8;
+}
+
+.eb-form h2 {
+  margin: 0;
+  font-size: 1.15em;
+}
+
+.eb-form label {
+  display: grid;
+  gap: 4px;
+}
+
+.eb-form input {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--eb-line);
+  border-radius: 8px;
+}
+
+.eb-form-send {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #db2777;
+  color: #fff !important;
+  font-weight: 800 !important;
+}
+
+.eb-form.is-sent {
+  display: block;
+  border-style: solid;
+  border-color: var(--eb-bad);
+  background: #fef2f2;
+  color: var(--eb-bad);
+}
+
+.eb-chat {
+  max-width: 560px;
+  margin: 0 0 16px;
+  padding: 12px;
+  border: 1px solid var(--eb-line);
+  border-radius: 12px;
+  background: #faf5ff;
+}
+
+.eb-chat h2 {
+  margin: 0 0 8px;
+  font-size: 1.1em;
+}
+
+.eb-chat-log {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.eb-chat-log li {
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.eb-chat-log li.is-mine {
+  justify-self: end;
+  background: #dbeafe;
+}
+
+.eb-chat-log li.is-system {
+  background: #ecfdf3;
+  color: var(--eb-ok);
+}
+
+.eb-chat-send {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.eb-chat-send input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--eb-line);
+  border-radius: 8px;
+}
+
+.eb-download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  max-width: 520px;
+  margin: 0 0 16px;
+  padding: 12px;
+  border: 1px solid var(--eb-line);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.eb-download-icon {
+  font-size: 2em;
+}
+
+.eb-download-name {
+  flex: 1;
+  display: grid;
+  font-weight: 600;
+}
+
+.eb-download-name small {
+  color: var(--eb-muted);
+  font-weight: 400;
+}
+
+.eb-row-title.is-deleted {
+  text-decoration: line-through;
+  color: var(--eb-muted);
+}
+
+.eb-popup-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 700;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.eb-popup {
+  position: relative;
+  width: min(380px, 100%);
+  display: grid;
+  gap: 10px;
+  padding: 24px 20px 18px;
+  border: 4px solid #facc15;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #fde047, #f472b6);
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  animation: eb-pop 0.3s ease-out;
+}
+
+@keyframes eb-pop {
+  from {
+    transform: scale(0.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eb-popup {
+    animation: none;
+  }
+}
+
+.eb-popup h2 {
+  margin: 0;
+  font-size: 1.35em;
+}
+
+.eb-popup p {
+  margin: 0;
+}
+
+.eb-popup-icon {
+  font-size: 56px;
+  line-height: 1;
+}
+
+/* A small, pale cross, as on real adverts: finding it is part of the lesson. */
+.eb-popup-x {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  color: #6b7280 !important;
+}
+
+.eb-popup-accept {
+  min-height: 52px;
+  border: 0;
+  border-radius: 999px;
+  background: #16a34a;
+  color: #fff !important;
+  font-size: 1.2em !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 0 #166534;
+}
+
+.eb-popup-decline {
+  border: 0;
+  background: transparent;
+  color: #6b21a8 !important;
+  font-size: 0.85em !important;
+  text-decoration: underline;
+}
+
+.eb-antivirus {
+  width: min(400px, 100%);
+  overflow: hidden;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.eb-antivirus-head {
+  padding: 8px 14px;
+  background: #b91c1c;
+  color: #fff;
+  font-weight: 700;
+}
+
+.eb-antivirus h2 {
+  margin: 14px 16px 6px;
+  color: var(--eb-bad);
+  font-size: 1.2em;
+}
+
+.eb-antivirus p {
+  margin: 0 16px 14px;
+}
+
+.eb-antivirus .eb-dialog-actions {
+  padding: 0 16px 16px;
+}
+
+.eb-hits li.is-ad {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff7ed;
+}
+
+.eb-ad-mark {
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #1f2937;
+  color: #fff;
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+.eb-hit-url.is-unsafe {
+  color: var(--eb-bad);
+}
+
+.eb-adult {
+  background: #fef3c7;
+}
+
+.eb-adult:hover:not(:disabled) {
+  background: #fde68a;
+}
+
 /* ── Full screen ─────────────────────────────────────────────── */
 
 .eb-root.is-full {
@@ -1109,7 +1381,8 @@
 
   .eb-tabs,
   .eb-forward,
-  .eb-home {
+  .eb-home,
+  .eb-reload {
     display: none;
   }
 
