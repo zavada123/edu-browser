@@ -941,7 +941,7 @@
   padding: 2px 8px;
   border-radius: 999px;
   background: var(--eb-accent-soft);
-  color: var(--eb-accent);
+  color: #1d4ed8;
   font-weight: 600;
   white-space: nowrap;
 }
