@@ -44,6 +44,8 @@ export type Op =
   | { readonly op: "callAdult" }
   | { readonly op: "closePopup"; readonly id: string }
   | { readonly op: "acceptPopup"; readonly id: string }
+  /** The student's answer to a question of the task: a word, a number, an author. */
+  | { readonly op: "answer"; readonly question: string; readonly text: string }
   /** Downloads a file offered on the page in front. */
   | { readonly op: "download"; readonly file: string }
   | { readonly op: "deleteDownload"; readonly id: number }
@@ -60,6 +62,7 @@ export const MAX_HISTORY = 600
 export const MAX_NAME = 60
 export const MAX_URL = 200
 export const MAX_DOWNLOADS = 50
+export const MAX_ANSWER = 80
 
 const fail = (error: string): OpResult => ({ ok: false, error })
 const done = (state: BrowserState): OpResult => ({ ok: true, state })
@@ -191,7 +194,7 @@ const formsInFront = (web: Web, state: BrowserState, kinds: ReadonlyArray<"form"
 }
 
 /** While a popup is open, the page under it cannot be used: only the popup's buttons and «Покликати дорослого». */
-const POPUP_FREE: ReadonlySet<Op["op"]> = new Set(["closePopup", "acceptPopup", "callAdult"])
+const POPUP_FREE: ReadonlySet<Op["op"]> = new Set(["closePopup", "acceptPopup", "callAdult", "answer"])
 
 const changePopup = (web: Web, state: BrowserState, id: string, accept: boolean): OpResult => {
   const popup = state.popups.find((p) => p.spec.id === id)
@@ -213,10 +216,10 @@ const download = (web: Web, state: BrowserState, file: string): OpResult => {
   const tab = activeTabOf(state)
   if (!tab) return fail("Немає відкритої вкладки")
   const url = currentUrl(tab)
-  const offer = blocksOn(web.map, url).find((b) => b.type === "download" && b.file === file)
-  if (!offer || offer.type !== "download") return fail("На цій сторінці немає такого файлу")
+  const offer = blocksOn(web.map, url).find((b) => (b.type === "download" || b.type === "photo") && b.file === file)
+  if (!offer) return fail("На цій сторінці немає такого файлу")
   if (state.downloads.length >= MAX_DOWNLOADS) return fail(`Забагато завантажень, можна не більше ${MAX_DOWNLOADS}`)
-  const virus = offer.virus === true
+  const virus = offer.type === "download" && offer.virus === true
   const item = { id: state.nextId, file, from: url, virus, status: virus ? ("warned" as const) : ("done" as const) }
   return done({ ...state, downloads: [...state.downloads, item], nextId: state.nextId + 1 })
 }
@@ -238,6 +241,10 @@ export const applyOp = (web: Web, state: BrowserState, op: Op): OpResult => {
       return formsInFront(web, state, ["chat"]).includes(op.form) ? done({ ...state, used: bump(state, "report") }) : fail("На цій сторінці немає такого чату")
     case "callAdult":
       return done({ ...state, used: bump(state, "callAdult") })
+    case "answer":
+      if (!state.questions.some((q) => q.id === op.question)) return fail("Немає такого питання")
+      if (op.text.length > MAX_ANSWER) return fail("Задовга відповідь")
+      return done({ ...state, answers: { ...state.answers, [op.question]: op.text.trim() } })
     case "closePopup":
       return changePopup(web, state, op.id, false)
     case "acceptPopup":

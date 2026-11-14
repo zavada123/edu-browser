@@ -32,6 +32,8 @@ export interface UiState {
     readonly results: ReadonlyArray<GoalResult> | null;
     /** Grows on «Оновити», so the page plays its loading look again. */
     readonly reloads: number;
+    /** Grows on «Почати спочатку», so fields typed into are emptied. */
+    readonly resets: number;
 }
 export type UiAction = {
     readonly type: "op";

@@ -22,6 +22,7 @@ type Step =
   | { readonly do: "clearHistory" | "callAdult" }
   | { readonly do: "closePopup"; readonly id: string }
   | { readonly do: "download"; readonly file: string }
+  | { readonly do: "answer"; readonly question: string; readonly text: string }
   | { readonly do: "deleteDownload"; readonly file: string }
 
 const tabWith = (web: Web, state: BrowserState, url: Url): number => {
@@ -63,6 +64,8 @@ const toOp = (web: Web, state: BrowserState, step: Step): Op => {
       return { op: "closePopup", id: step.id }
     case "download":
       return { op: "download", file: step.file }
+    case "answer":
+      return { op: "answer", question: step.question, text: step.text }
     case "deleteDownload": {
       const item = state.downloads.find((d) => d.file === step.file)
       if (!item) throw new Error(`Помилка в розв'язку: не завантажено ${step.file}`)
@@ -96,6 +99,25 @@ const SOLUTIONS: Readonly<Record<string, ReadonlyArray<Step>>> = {
     { do: "bookmark", folder: "Навчання" }
   ],
   "g4-history": [{ do: "go", url: "енциклопедія.edu/лелека", how: "history" }],
+  "g4-spelling": [
+    { do: "go", url: "словник.edu", how: "typed" },
+    { do: "go", url: "словник.edu/ведмежатко", how: "link" },
+    { do: "answer", question: "word", text: "ведмежатко" }
+  ],
+  "g4-two-sources": [
+    { do: "go", url: "енциклопедія.edu/лелека", how: "typed" },
+    { do: "answer", question: "encyclopedia", text: "від 3 до 5" },
+    { do: "go", url: "вікі-діти.edu/лелека", how: "typed" },
+    { do: "answer", question: "wiki", text: "4" }
+  ],
+  "g4-photo-author": [
+    { do: "go", url: "фото-природа.edu", how: "typed" },
+    { do: "go", url: "фото-природа.edu/бджола", how: "link" },
+    { do: "download", file: "бджола.jpg" },
+    { do: "answer", question: "author", text: "Леся Медова" },
+    { do: "answer", question: "title", text: "«Бджола на соняшнику»" },
+    { do: "answer", question: "site", text: "фото-природа.edu" }
+  ],
   "g5-search-clubs": [
     { do: "go", url: "пошук.edu/пошук?q=розклад гуртків", how: "typed" },
     { do: "go", url: "школа.edu/гуртки", how: "link" },

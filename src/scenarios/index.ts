@@ -222,6 +222,89 @@ const findInHistory: Scenario = {
   goals: [{ type: "activeTab", url: "енциклопедія.edu/лелека", how: "history", text: "Сторінку про лелеку відкрито з історії" }]
 }
 
+// 4 клас, inf3-11: словник, дві енциклопедії, автор фото.
+
+const spelling: Scenario = {
+  id: "g4-spelling",
+  grade: 4,
+  lesson: "inf3-11",
+  title: "Як пишеться?",
+  large: true,
+  task: [
+    "Ти не знаєш, як правильно: «ведмежатко» чи «ведмедятко»?",
+    "Відкрий шкільний словник: словник.edu.",
+    "Знайди слово і надрукуй його правильно в полі нижче."
+  ],
+  start: {
+    tabs: ["пошук.edu"],
+    questions: [{ id: "word", text: "Як правильно пишеться слово?", placeholder: "Надрукуй слово" }]
+  },
+  goals: [
+    { type: "visited", url: "словник.edu/ведмежатко", text: "Ти знайшов слово у словнику", hint: "На словник.edu клацни на слово «ведмежатко»." },
+    { type: "answer", question: "word", accept: ["ведмежатко"], text: "Слово надруковано правильно", hint: "Подивись у словнику, яка літера перед «-атко»: ж чи д." }
+  ]
+}
+
+const twoSources: Scenario = {
+  id: "g4-two-sources",
+  grade: 4,
+  lesson: "inf3-11",
+  title: "Перевір у двох джерелах",
+  large: true,
+  task: [
+    "Дізнайся, скільки яєць зносить лелека.",
+    "Прочитай статтю про лелеку в «Дитячій енциклопедії» (енциклопедія.edu).",
+    "Прочитай статтю про лелеку у «Вікі для дітей» (вікі-діти.edu).",
+    "Запиши, що каже кожне джерело. Чи однаково?"
+  ],
+  start: {
+    tabs: ["пошук.edu"],
+    questions: [
+      { id: "encyclopedia", text: "Скільки яєць за «Дитячою енциклопедією»?", placeholder: "Наприклад: від 1 до 2" },
+      { id: "wiki", text: "Скільки яєць за «Вікі для дітей»?", placeholder: "Число" }
+    ]
+  },
+  goals: [
+    { type: "visited", url: "енциклопедія.edu/лелека", text: "Прочитано статтю в «Дитячій енциклопедії»" },
+    { type: "visited", url: "вікі-діти.edu/лелека", text: "Прочитано статтю у «Вікі для дітей»" },
+    {
+      type: "answer",
+      question: "encyclopedia",
+      accept: ["від 3 до 5", "3-5", "3 до 5", "від трьох до п'яти", "від 3 до 5 яєць", "3-5 яєць"],
+      text: "Записано число з «Дитячої енциклопедії»",
+      hint: "У «Дитячій енциклопедії» написано «від … до … яєць». Запиши так: від 3 до 5."
+    },
+    { type: "answer", question: "wiki", accept: ["4", "чотири", "4 яйця", "зазвичай 4"], text: "Записано число з «Вікі для дітей»" }
+  ]
+}
+
+const photoAuthor: Scenario = {
+  id: "g4-photo-author",
+  grade: 4,
+  lesson: "inf3-11",
+  title: "Чиє фото?",
+  large: true,
+  task: [
+    "Для реферату потрібне фото бджоли. Відкрий сайт фото-природа.edu.",
+    "Знайди фото бджоли і завантаж його кнопкою «Завантажити».",
+    "Під фото є підпис. Запиши, хто автор, як називається фото і з якого воно сайту."
+  ],
+  start: {
+    tabs: ["пошук.edu"],
+    questions: [
+      { id: "author", text: "Хто автор фото?", placeholder: "Ім'я та прізвище" },
+      { id: "title", text: "Як називається фото?", placeholder: "Назва" },
+      { id: "site", text: "З якого сайту фото?", placeholder: "Адреса сайту" }
+    ]
+  },
+  goals: [
+    { type: "downloaded", file: "бджола.jpg", text: "Фото бджоли завантажено", hint: "Під фото бджоли натисни «Завантажити»." },
+    { type: "answer", question: "author", accept: ["Леся Медова", "Медова Леся"], text: "Автора записано правильно", hint: "Автор написаний під фото: «Фото: …»." },
+    { type: "answer", question: "title", accept: ["Бджола на соняшнику"], text: "Назву фото записано правильно" },
+    { type: "answer", question: "site", accept: ["фото-природа.edu", "https://фото-природа.edu", "foto-pryroda.edu"], text: "Сайт записано правильно", hint: "Адресу сайту видно в адресному рядку вгорі." }
+  ]
+}
+
 // 5–6 клас: пошук за ключовими словами, порядок у вкладках, історія.
 
 const searchSchool: Scenario = {
@@ -288,6 +371,9 @@ export const scenarios: ReadonlyArray<Scenario> = [
   firstBookmark,
   bookmarkFolder,
   findInHistory,
+  spelling,
+  twoSources,
+  photoAuthor,
   searchSchool,
   tabsOrder,
   cleanHistory

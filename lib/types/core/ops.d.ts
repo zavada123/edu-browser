@@ -75,6 +75,12 @@ export type Op =
     readonly op: "acceptPopup";
     readonly id: string;
 }
+/** The student's answer to a question of the task: a word, a number, an author. */
+ | {
+    readonly op: "answer";
+    readonly question: string;
+    readonly text: string;
+}
 /** Downloads a file offered on the page in front. */
  | {
     readonly op: "download";
@@ -102,6 +108,7 @@ export declare const MAX_HISTORY = 600;
 export declare const MAX_NAME = 60;
 export declare const MAX_URL = 200;
 export declare const MAX_DOWNLOADS = 50;
+export declare const MAX_ANSWER = 80;
 export declare const applyOp: (web: Web, state: BrowserState, op: Op) => OpResult;
 export type ReplayResult = {
     readonly ok: true;

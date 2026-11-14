@@ -19,6 +19,10 @@ export type Block = {
     readonly caption: string;
     readonly author: string;
     readonly bg?: string;
+    /** «CC BY 4.0», «Усі права захищено». */
+    readonly license?: string;
+    /** A file name: the photo gets a «Завантажити» button. */
+    readonly file?: string;
 } | {
     readonly type: "links";
     readonly title?: string;
