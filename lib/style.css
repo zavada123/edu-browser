@@ -337,12 +337,13 @@
   animation: eb-load 0.35s ease-out;
 }
 
+/* A short slide, not a fade: faded text would fail the contrast check while it plays. */
 @keyframes eb-load {
   from {
-    opacity: 0.45;
+    transform: translateY(6px);
   }
   to {
-    opacity: 1;
+    transform: none;
   }
 }
 
