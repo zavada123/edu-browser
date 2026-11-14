@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
 /** While the trainer covers the page, the page under it does not scroll. */
-export const PAGE_FULL_CLASS = "ed-page-full"
+export const PAGE_FULL_CLASS = "eb-page-full"
 
 /**
  * Set when «Наступне завдання» leaves a trainer in full screen: the trainer of the next exercise, mounted right

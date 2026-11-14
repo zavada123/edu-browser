@@ -1,0 +1,47 @@
+import { StrictMode, useState } from "react"
+import { createRoot } from "react-dom/client"
+import { scenarios } from "../scenarios/index.ts"
+import { EduBrowser } from "../ui/EduBrowser.tsx"
+import "./demo.css"
+
+const firstScenario = scenarios[0]
+if (!firstScenario) throw new Error("Немає жодного сценарію")
+
+/** Demo page: pick a scenario and try the trainer. */
+const Demo = () => {
+  const [id, setId] = useState(firstScenario.id)
+  const scenario = scenarios.find((s) => s.id === id) ?? firstScenario
+  const after = scenarios[scenarios.indexOf(scenario) + 1]
+  return (
+    <div className="demo">
+      <header className="demo-head">
+        <strong>Тренажер «Браузер»</strong>
+        <label>
+          <span className="demo-visually-hidden">Завдання</span>
+          <select value={id} onChange={(e) => setId(e.target.value)}>
+            {scenarios.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.grade} клас · {s.title}
+              </option>
+            ))}
+          </select>
+        </label>
+      </header>
+      <main className="demo-main">
+        <EduBrowser
+          key={scenario.id}
+          scenario={scenario}
+          {...(after === undefined ? {} : { next: { title: after.title, go: () => setId(after.id) } })}
+        />
+      </main>
+    </div>
+  )
+}
+
+const rootEl = document.getElementById("root")
+if (!rootEl) throw new Error("Немає #root")
+createRoot(rootEl).render(
+  <StrictMode>
+    <Demo />
+  </StrictMode>
+)
