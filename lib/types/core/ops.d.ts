@@ -91,6 +91,16 @@ export type Op =
 } | {
     readonly op: "openDownload";
     readonly id: number;
+}
+/** A search on the page in front (Ctrl+F), recorded when the student presses Enter. */
+ | {
+    readonly op: "find";
+    readonly text: string;
+}
+/** Page zoom in percent: one of `ZOOM_LEVELS`. */
+ | {
+    readonly op: "zoom";
+    readonly level: number;
 };
 export type OpResult = {
     readonly ok: true;
@@ -109,6 +119,11 @@ export declare const MAX_NAME = 60;
 export declare const MAX_URL = 200;
 export declare const MAX_DOWNLOADS = 50;
 export declare const MAX_ANSWER = 80;
+export declare const MAX_FINDS = 50;
+/** The zoom steps of Ctrl + and Ctrl −, as in desktop browsers. */
+export declare const ZOOM_LEVELS: ReadonlyArray<number>;
+/** The next zoom step up (`1`) or down (`-1`); the same level at the end of the list. */
+export declare const nextZoom: (level: number, delta: 1 | -1) => number;
 export declare const applyOp: (web: Web, state: BrowserState, op: Op) => OpResult;
 export type ReplayResult = {
     readonly ok: true;

@@ -7,12 +7,12 @@ export interface PageActions {
     readonly report: (form: string) => void;
     readonly download: (file: string) => void;
 }
-/** A form asks for data. Nothing is sent anywhere and nothing typed is kept: only the press is recorded. */
-export declare const FormBlock: ({ id, title, fields, button, actions }: {
+export declare const FormBlock: ({ id, title, fields, button, sentText, actions }: {
     readonly id: string;
     readonly title: string;
     readonly fields: ReadonlyArray<string>;
     readonly button: string;
+    readonly sentText: string | undefined;
     readonly actions: PageActions;
 }) => import("react").JSX.Element;
 /** A chat with scripted messages. What the student writes stays on their screen only. */

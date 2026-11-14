@@ -1,4 +1,5 @@
 import { type FormEvent, type RefObject, useEffect, useState } from "react"
+import { nextZoom } from "../core/ops.ts"
 import { canonicalUrl, iconOf, resolve, searchUrl, titleOf } from "../core/sites.ts"
 import { type BrowserState, currentUrl, type Tab, type Web } from "../core/state.ts"
 import { looksLikeAddress, NEW_TAB, type Url } from "../core/url.ts"
@@ -135,6 +136,48 @@ interface ToolbarProps {
   readonly onFull: () => void
 }
 
+/** The «⋮» menu: search on the page and the zoom, as in a desktop browser. Not in the large mode. */
+const MoreMenu = ({ zoom, dispatch }: { readonly zoom: number; readonly dispatch: (a: UiAction) => void }) => {
+  const [open, setOpen] = useState(false)
+  const setZoom = (level: number) => dispatch({ type: "op", op: { op: "zoom", level } })
+  return (
+    <div className="eb-more">
+      <button type="button" className="eb-tool" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)} aria-label="Меню" title="Меню">
+        ⋮
+      </button>
+      {open && (
+        <>
+          <div className="eb-backdrop" onPointerDown={() => setOpen(false)} />
+          <div className="eb-menu eb-more-menu" role="menu" aria-label="Меню">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false)
+                dispatch({ type: "findBar", open: true })
+              }}
+            >
+              🔍 Знайти на сторінці <kbd>Ctrl+F</kbd>
+            </button>
+            <div className="eb-zoom-row" role="group" aria-label="Масштаб">
+              <span>Масштаб</span>
+              <button type="button" role="menuitem" onClick={() => setZoom(nextZoom(zoom, -1))} disabled={zoom === nextZoom(zoom, -1)} aria-label="Зменшити масштаб" title="Зменшити (Ctrl −)">
+                −
+              </button>
+              <button type="button" role="menuitem" onClick={() => setZoom(100)} aria-label={`Масштаб ${zoom} %, повернути 100 %`} title="Повернути 100 % (Ctrl+0)">
+                {zoom} %
+              </button>
+              <button type="button" role="menuitem" onClick={() => setZoom(nextZoom(zoom, 1))} disabled={zoom === nextZoom(zoom, 1)} aria-label="Збільшити масштаб" title="Збільшити (Ctrl +)">
+                +
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export const Toolbar = ({ web, browser, tab, large, addressRef, dispatch, full, onFull }: ToolbarProps) => {
   const url = currentUrl(tab)
   const bookmarked = browser.bookmarks.some((b) => b.url === url)
@@ -161,6 +204,17 @@ export const Toolbar = ({ web, browser, tab, large, addressRef, dispatch, full, 
         onGo={(to) => dispatch({ type: "op", op: { op: "navigate", url: to, how: "typed" } })}
         onStar={() => dispatch({ type: "bookmarkDialog", open: true })}
       />
+      {browser.zoom !== 100 && (
+        <button
+          type="button"
+          className="eb-zoom-badge"
+          onClick={() => dispatch({ type: "op", op: { op: "zoom", level: 100 } })}
+          aria-label={`Масштаб ${browser.zoom} %. Повернути 100 %`}
+          title="Повернути 100 % (Ctrl+0)"
+        >
+          🔍 {browser.zoom} %
+        </button>
+      )}
       <button type="button" className="eb-tool eb-tabs-count" onClick={() => panel("tabs")} aria-label={`Вкладки: ${browser.tabs.length}`} title="Усі вкладки">
         <span>{browser.tabs.length}</span>
       </button>
@@ -180,6 +234,7 @@ export const Toolbar = ({ web, browser, tab, large, addressRef, dispatch, full, 
           📑
         </button>
       )}
+      {!large && <MoreMenu zoom={browser.zoom} dispatch={dispatch} />}
       <button type="button" className="eb-tool eb-full" onClick={onFull} aria-label={full ? "Вийти з повного екрана" : "На весь екран"} title={full ? "Вийти з повного екрана" : "На весь екран"}>
         {full ? "🗗" : "⛶"}
       </button>

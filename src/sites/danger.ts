@@ -94,6 +94,27 @@ export const pryz: Site = {
   }
 }
 
+/** A copy of the school diary on a strange address, without the lock: it collects logins and passwords. */
+export const fakeDiary: Site = {
+  host: "щоденник-школа.xyz",
+  aliases: ["shchodennyk-shkola.xyz"],
+  name: "Наша школа",
+  icon: "🏫",
+  color: "#065f46",
+  secure: false,
+  pages: {
+    "": {
+      title: "Вхід у щоденник — Наша школа",
+      adKeywords: ["щоденник", "вхід у щоденник", "оцінки"],
+      blocks: [
+        { type: "heading", text: "Електронний щоденник" },
+        { type: "text", text: "УВАГА! Твій щоденник буде заблоковано через 10 хвилин! Терміново увійди, щоб зберегти оцінки." },
+        { type: "form", id: "fake-login", title: "Вхід у щоденник", fields: ["Логін", "Пароль"], button: "Увійти" }
+      ]
+    }
+  }
+}
+
 /** A site that offers fairy tales but asks to download a program first. */
 export const kazkyFree: Site = {
   host: "казки-безкоштовно.xyz",

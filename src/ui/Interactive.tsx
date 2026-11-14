@@ -11,7 +11,10 @@ export interface PageActions {
 }
 
 /** A form asks for data. Nothing is sent anywhere and nothing typed is kept: only the press is recorded. */
-export const FormBlock = ({ id, title, fields, button, actions }: { readonly id: string; readonly title: string; readonly fields: ReadonlyArray<string>; readonly button: string; readonly actions: PageActions }) => {
+/** A field the browser hides while typing, as for a password. */
+const isSecret = (field: string): boolean => /пароль/i.test(field)
+
+export const FormBlock = ({ id, title, fields, button, sentText, actions }: { readonly id: string; readonly title: string; readonly fields: ReadonlyArray<string>; readonly button: string; readonly sentText: string | undefined; readonly actions: PageActions }) => {
   const sent = actions.submitted.includes(id)
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -19,8 +22,12 @@ export const FormBlock = ({ id, title, fields, button, actions }: { readonly id:
   }
   if (sent)
     return (
-      <div className="eb-form is-sent" role="status">
-        <b>Дані надіслано.</b> Тепер їх знають незнайомі люди, і забрати їх назад уже не можна.
+      <div className={`eb-form is-sent${sentText === undefined ? "" : " is-safe"}`} role="status">
+        {sentText ?? (
+          <>
+            <b>Дані надіслано.</b> Тепер їх знають незнайомі люди, і забрати їх назад уже не можна.
+          </>
+        )}
       </div>
     )
   return (
@@ -29,7 +36,7 @@ export const FormBlock = ({ id, title, fields, button, actions }: { readonly id:
       {fields.map((field) => (
         <label key={field}>
           <span>{field}</span>
-          <input name={field} autoComplete="off" />
+          <input name={field} type={isSecret(field) ? "password" : "text"} autoComplete="off" />
         </label>
       ))}
       <button type="submit" className="eb-form-send">
