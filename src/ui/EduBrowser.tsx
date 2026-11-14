@@ -10,6 +10,7 @@ import { BookmarkBar, BookmarkDialog, BookmarksPanel } from "./Bookmarks.tsx"
 import { TabStrip, Toolbar } from "./Chrome.tsx"
 import { useFullScreen } from "./fullscreen.ts"
 import { commandFor } from "./keys.ts"
+import { AntivirusDialog, DownloadsPanelBody, type PageActions, PopupWindow } from "./Interactive.tsx"
 import type { LinkHandlers } from "./links.ts"
 import { PageView } from "./PageView.tsx"
 import { ContextMenu, HistoryPanel, SidePanel, TabsPanel } from "./Panels.tsx"
@@ -92,6 +93,17 @@ export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfC
     }),
     []
   )
+  const actions: PageActions = useMemo(
+    () => ({
+      submitted: browser.submitted,
+      submit: (form: string) => dispatch({ type: "op", op: { op: "submitForm", form } }),
+      report: (form: string) => dispatch({ type: "op", op: { op: "report", form } }),
+      download: (file: string) => dispatch({ type: "op", op: { op: "download", file } })
+    }),
+    [browser.submitted]
+  )
+  const popup = browser.popups.find((p) => p.status === "open")
+  const warned = browser.downloads.find((d) => d.status === "warned")
   const onSearch = useCallback((query: string) => dispatch({ type: "op", op: { op: "navigate", url: searchUrl(query), how: "typed" } }), [])
 
   /** Keys belong to the trainer only after a click inside it, so keys elsewhere on the page stay the page's. */
@@ -163,7 +175,7 @@ export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfC
         <div className="eb-body">
           <div className="eb-page" ref={pageRef}>
             <div key={`${browser.activeTab}|${url}|${state.reloads}`} className="eb-page-inner">
-              <PageView web={web} url={url} links={links} onSearch={onSearch} />
+              <PageView web={web} url={url} links={links} onSearch={onSearch} actions={actions} />
             </div>
           </div>
           {state.panel && (
@@ -171,9 +183,24 @@ export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfC
               {state.panel === "history" && <HistoryPanel web={web} browser={browser} dispatch={dispatch} />}
               {state.panel === "bookmarks" && <BookmarksPanel web={web} browser={browser} dispatch={dispatch} />}
               {state.panel === "tabs" && <TabsPanel web={web} browser={browser} dispatch={dispatch} />}
+              {state.panel === "downloads" && <DownloadsPanelBody downloads={browser.downloads} onDelete={(id) => dispatch({ type: "op", op: { op: "deleteDownload", id } })} />}
             </SidePanel>
           )}
         </div>
+        {popup && (
+          <PopupWindow
+            popup={popup}
+            onAccept={() => dispatch({ type: "op", op: { op: "acceptPopup", id: popup.spec.id } })}
+            onClose={() => dispatch({ type: "op", op: { op: "closePopup", id: popup.spec.id } })}
+          />
+        )}
+        {!popup && warned && (
+          <AntivirusDialog
+            item={warned}
+            onDelete={() => dispatch({ type: "op", op: { op: "deleteDownload", id: warned.id } })}
+            onOpen={() => dispatch({ type: "ops", ops: [{ op: "openDownload", id: warned.id }] })}
+          />
+        )}
         {state.bookmarkDialog && <BookmarkDialog key={url} web={web} browser={browser} dispatch={dispatch} />}
       </div>
       {state.menu && <ContextMenu web={web} browser={browser} menu={state.menu} dispatch={dispatch} />}

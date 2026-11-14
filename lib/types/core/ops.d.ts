@@ -54,6 +54,37 @@ export type Op =
     readonly id: number;
 } | {
     readonly op: "clearHistory";
+}
+/** The student pressed the button of a form or sent a chat message on the page in front. */
+ | {
+    readonly op: "submitForm";
+    readonly form: string;
+}
+/** «Поскаржитися» in a chat on the page in front. */
+ | {
+    readonly op: "report";
+    readonly form: string;
+}
+/** «Покликати дорослого»: always possible. */
+ | {
+    readonly op: "callAdult";
+} | {
+    readonly op: "closePopup";
+    readonly id: string;
+} | {
+    readonly op: "acceptPopup";
+    readonly id: string;
+}
+/** Downloads a file offered on the page in front. */
+ | {
+    readonly op: "download";
+    readonly file: string;
+} | {
+    readonly op: "deleteDownload";
+    readonly id: number;
+} | {
+    readonly op: "openDownload";
+    readonly id: number;
 };
 export type OpResult = {
     readonly ok: true;
@@ -70,6 +101,7 @@ export declare const MAX_FOLDERS = 20;
 export declare const MAX_HISTORY = 600;
 export declare const MAX_NAME = 60;
 export declare const MAX_URL = 200;
+export declare const MAX_DOWNLOADS = 50;
 export declare const applyOp: (web: Web, state: BrowserState, op: Op) => OpResult;
 export type ReplayResult = {
     readonly ok: true;

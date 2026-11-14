@@ -19,6 +19,20 @@ export type Block =
   /** The search form of the search site and its results for the query in the address. */
   | { readonly type: "search" }
   | { readonly type: "note"; readonly text: string }
+  /**
+   * A form that asks for something. It sends nothing anywhere: the trainer only records that the student
+   * pressed the button, never what they typed.
+   */
+  | { readonly type: "form"; readonly id: string; readonly title: string; readonly fields: ReadonlyArray<string>; readonly button: string }
+  /** A chat with scripted messages; the student can write, or report the writer to the site. */
+  | { readonly type: "chat"; readonly id: string; readonly title: string; readonly messages: ReadonlyArray<ChatMessage>; readonly reply?: string }
+  /** A file to download. `virus: true` makes the antivirus warn about it. */
+  | { readonly type: "download"; readonly file: string; readonly label: string; readonly size: string; readonly virus?: boolean }
+
+export interface ChatMessage {
+  readonly from: string
+  readonly text: string
+}
 
 export interface LinkItem {
   readonly text: string
@@ -31,6 +45,8 @@ export interface Page {
   readonly blocks: ReadonlyArray<Block>
   /** Words the search site finds this page by. */
   readonly keywords?: ReadonlyArray<string>
+  /** The search site shows this page as «Реклама» above the results for these words. */
+  readonly adKeywords?: ReadonlyArray<string>
 }
 
 export interface Site {
@@ -54,6 +70,9 @@ export type SiteMap = Readonly<Record<string, Site>>
 
 export const SEARCH_HOST = "пошук.edu"
 export const SEARCH_PATH = "пошук"
+
+/** The sites on the new-tab page: the safe ones the class knows, without the search site itself. */
+export const tileSites = (sites: ReadonlyArray<Site>): ReadonlyArray<Site> => sites.filter((s) => s.host !== SEARCH_HOST && s.secure)
 
 export const searchUrl = (query: string): Url => `${SEARCH_HOST}/${SEARCH_PATH}?q=${query.trim()}`
 
@@ -156,6 +175,8 @@ export interface SearchHit {
   readonly title: string
   readonly site: Site
   readonly snippet: string
+  /** Paid: shown first and marked «Реклама». */
+  readonly ad?: boolean
 }
 
 const words = (s: string): ReadonlyArray<string> =>
@@ -170,7 +191,25 @@ const stemMatch = (a: string, b: string): boolean => {
   return a.slice(0, n) === b.slice(0, n)
 }
 
-/** Pages whose title or keywords hold every word of the query, best first. Hosts sorted for a stable order. */
+const pageUrl = (site: Site, path: string): Url => (path.length > 0 ? `${site.host}/${path}` : site.host)
+
+const snippetOf = (page: Page): string => {
+  const firstText = page.blocks.find((b) => b.type === "text")
+  return firstText?.type === "text" ? splitLinks(firstText.text).map((p) => (typeof p === "string" ? p : p.text)).join("").slice(0, 140) : ""
+}
+
+/** Adverts whose words share a stem with any word of the query. */
+const adsFor = (sites: ReadonlyArray<Site>, q: ReadonlyArray<string>): ReadonlyArray<SearchHit> =>
+  sites.flatMap((site) =>
+    Object.entries(site.pages)
+      .filter(([, page]) => (page.adKeywords ?? []).flatMap(words).some((k) => q.some((w) => stemMatch(k, w))))
+      .map(([path, page]) => ({ url: pageUrl(site, path), title: page.title, site, snippet: snippetOf(page), ad: true }))
+  )
+
+/**
+ * Adverts for the query first, then pages whose title or keywords hold every word of the query, best first.
+ * Hosts sorted for a stable order.
+ */
 export const search = (sites: ReadonlyArray<Site>, query: string): ReadonlyArray<SearchHit> => {
   const q = words(query)
   if (q.length === 0) return []
@@ -189,12 +228,12 @@ export const search = (sites: ReadonlyArray<Site>, query: string): ReadonlyArray
         score += inTitle ? 2 : inKeys ? 1 : 0
       }
       if (!all) continue
-      const firstText = page.blocks.find((b) => b.type === "text")
-      const snippet = firstText?.type === "text" ? splitLinks(firstText.text).map((p) => (typeof p === "string" ? p : p.text)).join("") : ""
-      hits.push({ url: path.length > 0 ? `${site.host}/${path}` : site.host, title: page.title, site, snippet: snippet.slice(0, 140), score })
+      hits.push({ url: pageUrl(site, path), title: page.title, site, snippet: snippetOf(page), score })
     }
   }
-  return hits.sort((a, b) => b.score - a.score || a.url.localeCompare(b.url, "uk")).map(({ score: _s, ...hit }) => hit)
+  const found = hits.sort((a, b) => b.score - a.score || a.url.localeCompare(b.url, "uk")).map(({ score: _s, ...hit }) => hit)
+  const ads = adsFor(sites, q)
+  return [...ads, ...found.filter((hit) => !ads.some((ad) => ad.url === hit.url))]
 }
 
 /**
@@ -203,10 +242,16 @@ export const search = (sites: ReadonlyArray<Site>, query: string): ReadonlyArray
  */
 export const linksOn = (sitesList: ReadonlyArray<Site>, sites: SiteMap, url: Url): ReadonlyArray<Url> => {
   const r = resolve(sites, url)
-  if (r.kind === "newTab") return sitesList.filter((s) => s.host !== SEARCH_HOST).map((s) => s.host)
+  if (r.kind === "newTab") return tileSites(sitesList).map((s) => s.host)
   if (r.kind === "noSite") return []
   const own = r.kind === "page" ? r.page.blocks.flatMap(blockLinks) : []
   const nav = (r.site.nav ?? []).map((i) => i.url)
   const found = r.kind === "page" && r.page.blocks.some((b) => b.type === "search") ? search(sitesList, r.query).map((h) => h.url) : []
   return [...[...own, ...nav].map((href) => canonicalUrl(sites, absoluteUrl(`${r.site.host}`, href))), r.site.host, ...found]
+}
+
+/** The blocks of the page at `url`, or none for the new-tab page and pages that do not exist. */
+export const blocksOn = (sites: SiteMap, url: Url): ReadonlyArray<Block> => {
+  const r = resolve(sites, url)
+  return r.kind === "page" ? r.page.blocks : []
 }

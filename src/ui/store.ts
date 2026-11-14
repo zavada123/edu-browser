@@ -3,7 +3,7 @@ import { applyOp, type Op } from "../core/ops.ts"
 import type { BrowserState, Web } from "../core/state.ts"
 import type { Url } from "../core/url.ts"
 
-export type Panel = "history" | "bookmarks" | "tabs"
+export type Panel = "history" | "bookmarks" | "tabs" | "downloads"
 
 export type Menu =
   | { readonly kind: "link"; readonly x: number; readonly y: number; readonly url: Url }
@@ -52,6 +52,14 @@ export const initialUi = (web: Web, browser: BrowserState, ops: ReadonlyArray<Op
 /** Steps after which the menus and the star dialog close: the page in front changed. */
 const MOVES: ReadonlySet<Op["op"]> = new Set(["navigate", "back", "forward", "newTab", "closeTab", "switchTab"])
 
+/** What the trainer says after a step that has no other visible result. */
+const FEEDBACK: Partial<Readonly<Record<Op["op"], string>>> = {
+  callAdult: "🙋 Дорослий уже поруч. Молодець: коли щось лякає або дивує, треба розповісти дорослому!",
+  openDownload: "😱 Вірус потрапив на комп'ютер! Так робити не можна. Натисни «Почати спочатку» і спробуй ще раз.",
+  report: "🚩 Скаргу надіслано модераторам сайту.",
+  deleteDownload: "🗑 Файл видалено."
+}
+
 const applyAll = (state: UiState, ops: ReadonlyArray<Op>): UiState => {
   let browser = state.browser
   for (const op of ops) {
@@ -60,8 +68,10 @@ const applyAll = (state: UiState, ops: ReadonlyArray<Op>): UiState => {
     browser = result.state
   }
   const moved = ops.some((op) => MOVES.has(op.op))
+  const said = ops.map((op) => FEEDBACK[op.op]).find((m) => m !== undefined)
   return {
     ...state,
+    message: said ?? state.message,
     browser,
     ops: [...state.ops, ...ops],
     // The old result no longer describes what is on the screen.

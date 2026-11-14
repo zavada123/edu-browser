@@ -9,6 +9,11 @@ export type Goal = ({
     readonly type: "activeTab";
     readonly url: Url;
     readonly how?: How;
+}
+/** The page in front is any page of this site. */
+ | {
+    readonly type: "activeSite";
+    readonly host: string;
 } | {
     readonly type: "tabOpen";
     readonly url: Url;
@@ -57,6 +62,32 @@ export type Goal = ({
 } | {
     readonly type: "historyCount";
     readonly equals: number;
+}
+/** The student sent / did not send the form or chat message with this id. */
+ | {
+    readonly type: "submitted";
+    readonly form: string;
+} | {
+    readonly type: "notSubmitted";
+    readonly form: string;
+}
+/** The popup was closed with ✕ or its safe button, without pressing the tempting one. */
+ | {
+    readonly type: "popupClosed";
+    readonly id: string;
+} | {
+    readonly type: "downloaded";
+    readonly file: string;
+}
+/** The file was downloaded and then deleted (after the antivirus warning, for example). */
+ | {
+    readonly type: "downloadDeleted";
+    readonly file: string;
+}
+/** The file was never opened. */
+ | {
+    readonly type: "notOpened";
+    readonly file: string;
 }) & {
     readonly text?: string;
     readonly hint?: string;

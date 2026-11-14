@@ -1,10 +1,12 @@
-import { canonicalUrl, linksOn, titleOf } from "./sites.ts"
+import { blocksOn, canonicalUrl, linksOn, titleOf } from "./sites.ts"
 import {
   type Action,
   activeTabOf,
   type BrowserState,
   currentUrl,
   type How,
+  type PopupState,
+  popupMatches,
   type Tab,
   type TabEntry,
   type Web
@@ -34,6 +36,18 @@ export type Op =
   | { readonly op: "addFolder"; readonly name: string }
   | { readonly op: "deleteHistory"; readonly id: number }
   | { readonly op: "clearHistory" }
+  /** The student pressed the button of a form or sent a chat message on the page in front. */
+  | { readonly op: "submitForm"; readonly form: string }
+  /** «Поскаржитися» in a chat on the page in front. */
+  | { readonly op: "report"; readonly form: string }
+  /** «Покликати дорослого»: always possible. */
+  | { readonly op: "callAdult" }
+  | { readonly op: "closePopup"; readonly id: string }
+  | { readonly op: "acceptPopup"; readonly id: string }
+  /** Downloads a file offered on the page in front. */
+  | { readonly op: "download"; readonly file: string }
+  | { readonly op: "deleteDownload"; readonly id: number }
+  | { readonly op: "openDownload"; readonly id: number }
 
 export type OpResult = { readonly ok: true; readonly state: BrowserState } | { readonly ok: false; readonly error: string }
 
@@ -45,6 +59,7 @@ export const MAX_FOLDERS = 20
 export const MAX_HISTORY = 600
 export const MAX_NAME = 60
 export const MAX_URL = 200
+export const MAX_DOWNLOADS = 50
 
 const fail = (error: string): OpResult => ({ ok: false, error })
 const done = (state: BrowserState): OpResult => ({ ok: true, state })
@@ -55,7 +70,9 @@ const bump = (state: BrowserState, action: Action): BrowserState["used"] => ({ .
 const recordVisit = (web: Web, state: BrowserState, entry: TabEntry): BrowserState => {
   if (entry.url === NEW_TAB) return state
   const history = [...state.history, { id: state.nextId, url: entry.url, title: titleOf(web.map, entry.url), day: 0 }].slice(-MAX_HISTORY)
-  return { ...state, history, nextId: state.nextId + 1, visits: [...state.visits, entry].slice(-MAX_HISTORY) }
+  // A popup waiting for this page shows now, once.
+  const popups = state.popups.map((p): PopupState => (p.status === "waiting" && p.spec.at !== undefined && popupMatches(p.spec.at, entry.url) ? { ...p, status: "open" } : p))
+  return { ...state, history, popups, nextId: state.nextId + 1, visits: [...state.visits, entry].slice(-MAX_HISTORY) }
 }
 
 const replaceTab = (state: BrowserState, tab: Tab): BrowserState => ({ ...state, tabs: state.tabs.map((t) => (t.id === tab.id ? tab : t)) })
@@ -167,7 +184,76 @@ const addFolder = (state: BrowserState, raw: string): OpResult => {
   return done({ ...state, folders: [...state.folders, name] })
 }
 
+/** Ids of the forms and chats on the page in front. */
+const formsInFront = (web: Web, state: BrowserState, kinds: ReadonlyArray<"form" | "chat">): ReadonlyArray<string> => {
+  const tab = activeTabOf(state)
+  return tab ? blocksOn(web.map, currentUrl(tab)).flatMap((b) => ((b.type === "form" || b.type === "chat") && kinds.includes(b.type) ? [b.id] : [])) : []
+}
+
+/** While a popup is open, the page under it cannot be used: only the popup's buttons and «Покликати дорослого». */
+const POPUP_FREE: ReadonlySet<Op["op"]> = new Set(["closePopup", "acceptPopup", "callAdult"])
+
+const changePopup = (web: Web, state: BrowserState, id: string, accept: boolean): OpResult => {
+  const popup = state.popups.find((p) => p.spec.id === id)
+  if (!popup || popup.status !== "open") return fail("Немає такого відкритого вікна")
+  const popups = state.popups.map((p): PopupState => (p.spec.id === id ? { ...p, status: accept ? "accepted" : "closed" } : p))
+  const changed = { ...state, popups }
+  return accept && popup.spec.acceptUrl !== undefined ? openPopupTab(web, changed, popup.spec.acceptUrl) : done(changed)
+}
+
+/** The tempting button of a popup opens its page in a new tab, as adverts do. */
+const openPopupTab = (web: Web, state: BrowserState, raw: Url): OpResult => {
+  if (state.tabs.length >= MAX_TABS) return done(state)
+  const entry: TabEntry = { url: canonicalUrl(web.map, raw), how: "popup" }
+  const tab: Tab = { id: state.nextTabId, stack: [entry], index: 0, via: "popup" }
+  return done(recordVisit(web, { ...state, tabs: [...state.tabs, tab], activeTab: tab.id, nextTabId: state.nextTabId + 1 }, entry))
+}
+
+const download = (web: Web, state: BrowserState, file: string): OpResult => {
+  const tab = activeTabOf(state)
+  if (!tab) return fail("Немає відкритої вкладки")
+  const url = currentUrl(tab)
+  const offer = blocksOn(web.map, url).find((b) => b.type === "download" && b.file === file)
+  if (!offer || offer.type !== "download") return fail("На цій сторінці немає такого файлу")
+  if (state.downloads.length >= MAX_DOWNLOADS) return fail(`Забагато завантажень, можна не більше ${MAX_DOWNLOADS}`)
+  const virus = offer.virus === true
+  const item = { id: state.nextId, file, from: url, virus, status: virus ? ("warned" as const) : ("done" as const) }
+  return done({ ...state, downloads: [...state.downloads, item], nextId: state.nextId + 1 })
+}
+
+const changeDownload = (state: BrowserState, id: number, status: "deleted" | "opened"): OpResult => {
+  const item = state.downloads.find((d) => d.id === id)
+  if (!item || item.status === "deleted") return fail("Немає такого файлу")
+  return done({ ...state, downloads: state.downloads.map((d) => (d.id === id ? { ...d, status } : d)) })
+}
+
 export const applyOp = (web: Web, state: BrowserState, op: Op): OpResult => {
+  if (!POPUP_FREE.has(op.op) && state.popups.some((p) => p.status === "open")) return fail("Спершу закрий спливне вікно")
+  switch (op.op) {
+    case "submitForm":
+      return formsInFront(web, state, ["form", "chat"]).includes(op.form)
+        ? done({ ...state, submitted: state.submitted.includes(op.form) ? state.submitted : [...state.submitted, op.form] })
+        : fail("На цій сторінці немає такої форми")
+    case "report":
+      return formsInFront(web, state, ["chat"]).includes(op.form) ? done({ ...state, used: bump(state, "report") }) : fail("На цій сторінці немає такого чату")
+    case "callAdult":
+      return done({ ...state, used: bump(state, "callAdult") })
+    case "closePopup":
+      return changePopup(web, state, op.id, false)
+    case "acceptPopup":
+      return changePopup(web, state, op.id, true)
+    case "download":
+      return download(web, state, op.file)
+    case "deleteDownload":
+      return changeDownload(state, op.id, "deleted")
+    case "openDownload":
+      return changeDownload(state, op.id, "opened")
+    default:
+      return applyBrowsing(web, state, op)
+  }
+}
+
+const applyBrowsing = (web: Web, state: BrowserState, op: Op): OpResult => {
   switch (op.op) {
     case "navigate":
       return go(web, state, op.url, op.how)
@@ -201,6 +287,8 @@ export const applyOp = (web: Web, state: BrowserState, op: Op): OpResult => {
       return state.history.some((h) => h.id === op.id) ? done({ ...state, history: state.history.filter((h) => h.id !== op.id), used: bump(state, "deleteHistory") }) : fail("Немає такого запису в історії")
     case "clearHistory":
       return done({ ...state, history: [], used: bump(state, "clearHistory") })
+    default:
+      return fail("Невідома дія")
   }
 }
 

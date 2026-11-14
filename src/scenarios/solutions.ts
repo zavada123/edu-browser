@@ -19,7 +19,10 @@ type Step =
   | { readonly do: "bookmark"; readonly folder?: string; readonly title?: string }
   | { readonly do: "folder"; readonly name: string }
   | { readonly do: "forget"; readonly url: Url }
-  | { readonly do: "clearHistory" }
+  | { readonly do: "clearHistory" | "callAdult" }
+  | { readonly do: "closePopup"; readonly id: string }
+  | { readonly do: "download"; readonly file: string }
+  | { readonly do: "deleteDownload"; readonly file: string }
 
 const tabWith = (web: Web, state: BrowserState, url: Url): number => {
   const want = canonicalUrl(web.map, url)
@@ -54,7 +57,17 @@ const toOp = (web: Web, state: BrowserState, step: Step): Op => {
       return { op: "deleteHistory", id: entry.id }
     }
     case "clearHistory":
-      return { op: "clearHistory" }
+    case "callAdult":
+      return { op: step.do }
+    case "closePopup":
+      return { op: "closePopup", id: step.id }
+    case "download":
+      return { op: "download", file: step.file }
+    case "deleteDownload": {
+      const item = state.downloads.find((d) => d.file === step.file)
+      if (!item) throw new Error(`Помилка в розв'язку: не завантажено ${step.file}`)
+      return { op: "deleteDownload", id: item.id }
+    }
   }
 }
 
@@ -70,6 +83,10 @@ const SOLUTIONS: Readonly<Record<string, ReadonlyArray<Step>>> = {
     { do: "switch", url: "казки.edu" },
     { do: "openInTab", url: "казки.edu/рукавичка" }
   ],
+  "g3-chat-password": [{ do: "callAdult" }],
+  "g3-prize-popup": [{ do: "closePopup", id: "prize" }],
+  "g3-safe-result": [{ do: "go", url: "казки.edu", how: "link" }],
+  "g3-virus-file": [{ do: "download", file: "супер-гонки.exe" }, { do: "deleteDownload", file: "супер-гонки.exe" }, { do: "callAdult" }],
   "g4-first-bookmark": [{ do: "go", url: "казки.edu/колобок", how: "link" }, { do: "bookmark" }],
   "g4-bookmark-folder": [
     { do: "go", url: "словник.edu", how: "typed" },
