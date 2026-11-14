@@ -88,6 +88,15 @@ export type Goal = ({
  | {
     readonly type: "notOpened";
     readonly file: string;
+}
+/**
+ * The answer to the question matches one of `accept`. Case, spaces, quotes, the stress mark and
+ * the kind of apostrophe do not matter: «Остап Квітковий» = «остап  квітковий».
+ */
+ | {
+    readonly type: "answer";
+    readonly question: string;
+    readonly accept: ReadonlyArray<string>;
 }) & {
     readonly text?: string;
     readonly hint?: string;
@@ -100,6 +109,8 @@ export interface GoalResult {
     /** Shown only when the condition is not met. */
     readonly hint: string;
 }
+/** Compares answers the way a teacher would: no case, extra spaces, quotes, stress marks or apostrophe kinds. */
+export declare const normalizeAnswer: (s: string) => string;
 /** Default wording of a goal for the task list. */
 export declare const describeGoal: (web: Web, goal: Goal) => string;
 export declare const checkGoals: (web: Web, state: BrowserState, goals: ReadonlyArray<Goal>) => ReadonlyArray<GoalResult>;

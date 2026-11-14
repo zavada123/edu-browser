@@ -174,7 +174,7 @@ export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfC
         <BookmarkBar web={web} browser={browser} dispatch={dispatch} />
         <div className="eb-body">
           <div className="eb-page" ref={pageRef}>
-            <div key={`${browser.activeTab}|${url}|${state.reloads}`} className="eb-page-inner">
+            <div key={`${browser.activeTab}|${url}|${state.reloads}|${state.resets}`} className="eb-page-inner">
               <PageView web={web} url={url} links={links} onSearch={onSearch} actions={actions} />
             </div>
           </div>

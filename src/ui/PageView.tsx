@@ -124,7 +124,13 @@ const BlockView = ({ block, base, web, query, links, onSearch, actions }: BlockP
           <figcaption>
             {block.caption}
             <span className="eb-author">Фото: {block.author}</span>
+            {block.license && <span className="eb-license">Ліцензія: {block.license}</span>}
           </figcaption>
+          {block.file !== undefined && (
+            <button type="button" className="eb-btn eb-photo-save" onClick={() => block.file !== undefined && actions.download(block.file)}>
+              ⬇ Завантажити фото
+            </button>
+          )}
         </figure>
       )
     case "links":

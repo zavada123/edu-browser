@@ -36,6 +36,11 @@ export type Goal = (
   | { readonly type: "downloadDeleted"; readonly file: string }
   /** The file was never opened. */
   | { readonly type: "notOpened"; readonly file: string }
+  /**
+   * The answer to the question matches one of `accept`. Case, spaces, quotes, the stress mark and
+   * the kind of apostrophe do not matter: «Остап Квітковий» = «остап  квітковий».
+   */
+  | { readonly type: "answer"; readonly question: string; readonly accept: ReadonlyArray<string> }
 ) & { readonly text?: string; readonly hint?: string }
 
 export interface GoalResult {
@@ -46,6 +51,21 @@ export interface GoalResult {
   /** Shown only when the condition is not met. */
   readonly hint: string
 }
+
+/** Compares answers the way a teacher would: no case, extra spaces, quotes, stress marks or apostrophe kinds. */
+export const normalizeAnswer = (s: string): string =>
+  s
+    .normalize("NFD")
+    .replace(/\u0301/g, "")
+    .normalize("NFC")
+    .toLocaleLowerCase("uk")
+    .replace(/[’ʼ`´]/g, "'")
+    .replace(/[«»"„“”.!?]/g, "")
+    .replace(/\s*([–—-])\s*/g, "-")
+    .replace(/\s+/g, " ")
+    .trim()
+
+const sameAnswer = (a: string, b: string): boolean => normalizeAnswer(a) === normalizeAnswer(b)
 
 const sameText = (a: string, b: string): boolean => a.trim().toLocaleLowerCase("uk") === b.trim().toLocaleLowerCase("uk")
 
@@ -121,6 +141,8 @@ export const describeGoal = (web: Web, goal: Goal): string => {
       return `Файл «${goal.file}» видалено`
     case "notOpened":
       return `Файл «${goal.file}» не відкривали`
+    case "answer":
+      return "Відповідь правильна"
   }
 }
 
@@ -178,6 +200,8 @@ const defaultHint = (goal: Goal): string => {
       return "Натисни кнопку «Завантажити» на сторінці."
     case "downloadDeleted":
       return "Коли антивірус попереджає про загрозу, натисни «Видалити файл»."
+    case "answer":
+      return "Перевір відповідь: знайди її ще раз на сайті й надрукуй точно так, як там написано."
     case "notOpened":
       return "Файл, про який попереджає антивірус, не можна відкривати. Натисни «Почати спочатку» і спробуй ще раз."
   }
@@ -247,6 +271,10 @@ const isMet = (web: Web, state: BrowserState, goal: Goal): boolean => {
       return state.downloads.some((d) => d.file === goal.file && d.status === "deleted")
     case "notOpened":
       return !state.downloads.some((d) => d.file === goal.file && d.status === "opened")
+    case "answer": {
+      const given = state.answers[goal.question]
+      return given !== undefined && goal.accept.some((a) => sameAnswer(a, given))
+    }
   }
 }
 

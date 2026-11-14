@@ -23,6 +23,8 @@ export interface UiState {
   readonly results: ReadonlyArray<GoalResult> | null
   /** Grows on «Оновити», so the page plays its loading look again. */
   readonly reloads: number
+  /** Grows on «Почати спочатку», so fields typed into are emptied. */
+  readonly resets: number
 }
 
 export type UiAction =
@@ -46,7 +48,8 @@ export const initialUi = (web: Web, browser: BrowserState, ops: ReadonlyArray<Op
   bookmarkDialog: false,
   message: null,
   results: null,
-  reloads: 0
+  reloads: 0,
+  resets: 0
 })
 
 /** Steps after which the menus and the star dialog close: the page in front changed. */
@@ -57,7 +60,8 @@ const FEEDBACK: Partial<Readonly<Record<Op["op"], string>>> = {
   callAdult: "🙋 Дорослий уже поруч. Молодець: коли щось лякає або дивує, треба розповісти дорослому!",
   openDownload: "😱 Вірус потрапив на комп'ютер! Так робити не можна. Натисни «Почати спочатку» і спробуй ще раз.",
   report: "🚩 Скаргу надіслано модераторам сайту.",
-  deleteDownload: "🗑 Файл видалено."
+  deleteDownload: "🗑 Файл видалено.",
+  download: "⬇ Файл завантажено. Він є в панелі завантажень ⬇ угорі."
 }
 
 const applyAll = (state: UiState, ops: ReadonlyArray<Op>): UiState => {
@@ -103,6 +107,6 @@ export const reducer = (state: UiState, action: UiAction): UiState => {
     case "check":
       return { ...state, results: checkGoals(state.web, state.browser, action.goals), menu: null }
     case "reset":
-      return initialUi(state.web, action.browser)
+      return { ...initialUi(state.web, action.browser), resets: state.resets + 1 }
   }
 }

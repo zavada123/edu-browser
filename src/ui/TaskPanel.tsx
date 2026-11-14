@@ -1,5 +1,6 @@
 import { allMet } from "../core/goals.ts"
 import type { Scenario } from "../scenarios/types.ts"
+import { Questions } from "./Questions.tsx"
 import type { UiAction, UiState } from "./store.ts"
 
 interface Props {
@@ -39,6 +40,7 @@ export const TaskPanel = ({ scenario, state, open, onToggle, onReset, dispatch, 
           <li key={step}>{step}</li>
         ))}
       </ol>
+      <Questions key={state.resets} questions={state.browser.questions} answers={state.browser.answers} dispatch={dispatch} />
       <div className="eb-task-actions">
         {selfCheck && (
           <button type="button" className="eb-check" onClick={() => dispatch({ type: "check", goals: scenario.goals })}>

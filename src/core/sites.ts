@@ -10,7 +10,17 @@ export type Block =
   | { readonly type: "heading"; readonly text: string }
   | { readonly type: "text"; readonly text: string }
   /** A photo: a big emoji on a coloured card, with the author under it. Every photo has an author. */
-  | { readonly type: "photo"; readonly art: string; readonly caption: string; readonly author: string; readonly bg?: string }
+  | {
+      readonly type: "photo"
+      readonly art: string
+      readonly caption: string
+      readonly author: string
+      readonly bg?: string
+      /** «CC BY 4.0», «Усі права захищено». */
+      readonly license?: string
+      /** A file name: the photo gets a «Завантажити» button. */
+      readonly file?: string
+    }
   | { readonly type: "links"; readonly title?: string; readonly items: ReadonlyArray<LinkItem> }
   | { readonly type: "list"; readonly items: ReadonlyArray<string> }
   | { readonly type: "table"; readonly head: ReadonlyArray<string>; readonly rows: ReadonlyArray<ReadonlyArray<string>> }

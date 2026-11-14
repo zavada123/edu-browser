@@ -56,6 +56,14 @@ export interface PopupSpec {
   readonly at?: Url
 }
 
+/** A question the student answers after finding the answer on the sites: «Хто автор фото?». */
+export interface Question {
+  readonly id: string
+  readonly text: string
+  /** A hint under the field: «Число», «Ім'я та прізвище». */
+  readonly placeholder?: string
+}
+
 export type PopupStatus = "waiting" | "open" | "closed" | "accepted"
 
 export interface PopupState {
@@ -92,6 +100,10 @@ export interface BrowserState {
   /** Ids of forms and chats the student sent something from. What they typed is never kept. */
   readonly submitted: ReadonlyArray<string>
   readonly downloads: ReadonlyArray<Download>
+  /** Questions of the task the student answers in the task card. */
+  readonly questions: ReadonlyArray<Question>
+  /** The last answer to each question, by question id. */
+  readonly answers: Readonly<Record<string, string>>
 }
 
 /** The made-up web a scenario runs in. */
@@ -115,6 +127,7 @@ export interface StartSpec {
   /** The page of «Домашня сторінка». Default: the search site. */
   readonly home?: Url
   readonly popups?: ReadonlyArray<PopupSpec>
+  readonly questions?: ReadonlyArray<Question>
 }
 
 export const DEFAULT_HOME: Url = "пошук.edu"
@@ -164,6 +177,8 @@ export const buildState = (web: Web, start: StartSpec = {}): BrowserState => {
     home: url(start.home ?? DEFAULT_HOME),
     popups,
     submitted: [],
-    downloads: []
+    downloads: [],
+    questions: start.questions ?? [],
+    answers: {}
   }
 }

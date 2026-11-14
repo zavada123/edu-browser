@@ -1332,6 +1332,47 @@
   background: #fde68a;
 }
 
+.eb-license {
+  width: 100%;
+  font-size: 0.9em;
+}
+
+.eb-photo-save {
+  margin-top: 6px;
+}
+
+.eb-questions {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #eff6ff;
+}
+
+.eb-answer label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  font-weight: 600;
+}
+
+.eb-answer-row {
+  display: flex;
+  gap: 6px;
+}
+
+.eb-answer input {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--eb-line);
+  border-radius: 8px;
+  font-weight: 400;
+}
+
 /* ── Full screen ─────────────────────────────────────────────── */
 
 .eb-root.is-full {
