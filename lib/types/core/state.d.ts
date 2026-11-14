@@ -29,7 +29,7 @@ export interface HistoryEntry {
     readonly day: number;
 }
 /** Actions counted for goals like «повернись кнопкою „Назад“». */
-export type Action = "back" | "forward" | "reload" | "newTab" | "closeTab" | "home" | "deleteHistory" | "clearHistory" | "callAdult" | "report";
+export type Action = "back" | "forward" | "reload" | "newTab" | "closeTab" | "home" | "deleteHistory" | "clearHistory" | "callAdult" | "report" | "find" | "zoom";
 /**
  * A window that pops up over the page: an advert, «Дозволити сповіщення?», a prize. The scenario decides
  * what it says and when it shows: at the start, or when the student opens the page `at`.
@@ -69,6 +69,11 @@ export interface Download {
     readonly virus: boolean;
     readonly status: DownloadStatus;
 }
+/** A search on the page in front (Ctrl+F): the page and the words. */
+export interface FindEntry {
+    readonly url: Url;
+    readonly text: string;
+}
 export interface BrowserState {
     readonly tabs: ReadonlyArray<Tab>;
     readonly activeTab: number;
@@ -91,6 +96,10 @@ export interface BrowserState {
     readonly questions: ReadonlyArray<Question>;
     /** The last answer to each question, by question id. */
     readonly answers: Readonly<Record<string, string>>;
+    /** Page zoom in percent (Ctrl + / Ctrl −); 100 is the normal size. */
+    readonly zoom: number;
+    /** Searches on the page (Ctrl+F), oldest first. */
+    readonly finds: ReadonlyArray<FindEntry>;
 }
 /** The made-up web a scenario runs in. */
 export interface Web {

@@ -50,6 +50,10 @@ export type Op =
   | { readonly op: "download"; readonly file: string }
   | { readonly op: "deleteDownload"; readonly id: number }
   | { readonly op: "openDownload"; readonly id: number }
+  /** A search on the page in front (Ctrl+F), recorded when the student presses Enter. */
+  | { readonly op: "find"; readonly text: string }
+  /** Page zoom in percent: one of `ZOOM_LEVELS`. */
+  | { readonly op: "zoom"; readonly level: number }
 
 export type OpResult = { readonly ok: true; readonly state: BrowserState } | { readonly ok: false; readonly error: string }
 
@@ -63,6 +67,17 @@ export const MAX_NAME = 60
 export const MAX_URL = 200
 export const MAX_DOWNLOADS = 50
 export const MAX_ANSWER = 80
+export const MAX_FINDS = 50
+
+/** The zoom steps of Ctrl + and Ctrl −, as in desktop browsers. */
+export const ZOOM_LEVELS: ReadonlyArray<number> = [50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200]
+
+/** The next zoom step up (`1`) or down (`-1`); the same level at the end of the list. */
+export const nextZoom = (level: number, delta: 1 | -1): number => {
+  const index = ZOOM_LEVELS.indexOf(level)
+  const at = index < 0 ? ZOOM_LEVELS.indexOf(100) : index
+  return ZOOM_LEVELS[Math.min(Math.max(at + delta, 0), ZOOM_LEVELS.length - 1)] ?? 100
+}
 
 const fail = (error: string): OpResult => ({ ok: false, error })
 const done = (state: BrowserState): OpResult => ({ ok: true, state })
@@ -294,6 +309,17 @@ const applyBrowsing = (web: Web, state: BrowserState, op: Op): OpResult => {
       return state.history.some((h) => h.id === op.id) ? done({ ...state, history: state.history.filter((h) => h.id !== op.id), used: bump(state, "deleteHistory") }) : fail("Немає такого запису в історії")
     case "clearHistory":
       return done({ ...state, history: [], used: bump(state, "clearHistory") })
+    case "find": {
+      const tab = activeTabOf(state)
+      if (!tab) return fail("Немає відкритої вкладки")
+      const text = cleanName(op.text)
+      if (text.length === 0) return fail("Порожній пошук")
+      if (text.length > MAX_NAME) return fail("Задовгий пошук")
+      const finds = [...state.finds, { url: currentUrl(tab), text }].slice(-MAX_FINDS)
+      return done({ ...state, finds, used: bump(state, "find") })
+    }
+    case "zoom":
+      return ZOOM_LEVELS.includes(op.level) ? done({ ...state, zoom: op.level, used: bump(state, "zoom") }) : fail("Такого масштабу немає")
     default:
       return fail("Невідома дія")
   }

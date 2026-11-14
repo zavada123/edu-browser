@@ -22,6 +22,16 @@ describe("commandFor", () => {
     expect(commandFor(press("Tab", "Tab", { ctrl: true, shift: true }))).toBe("prevTab")
   })
 
+  test("Ctrl+F finds on the page, Ctrl with + − 0 zooms", () => {
+    expect(commandFor(press("а", "KeyF", { ctrl: true }))).toBe("find")
+    expect(commandFor(press("=", "Equal", { ctrl: true }))).toBe("zoomIn")
+    expect(commandFor(press("+", "Equal", { ctrl: true, shift: true }))).toBe("zoomIn")
+    expect(commandFor(press("+", "NumpadAdd", { ctrl: true }))).toBe("zoomIn")
+    expect(commandFor(press("-", "Minus", { ctrl: true }))).toBe("zoomOut")
+    expect(commandFor(press("0", "Digit0", { ctrl: true }))).toBe("zoomReset")
+    expect(commandFor(press("-", "Minus"))).toBeNull()
+  })
+
   test("plain letters and Ctrl+Alt are not shortcuts", () => {
     expect(commandFor(press("t", "KeyT"))).toBeNull()
     expect(commandFor(press("t", "KeyT", { ctrl: true, alt: true }))).toBeNull()

@@ -358,6 +358,56 @@ const cleanHistory: Scenario = {
   ]
 }
 
+const lockInBar: Scenario = {
+  id: "g5-lock",
+  grade: 5,
+  title: "Замок у рядку",
+  task: [
+    "Тобі прийшов лист: «Терміново увійди в щоденник, бо його заблокують!». Посилання з листа відкрилося в першій вкладці.",
+    "Порівняй адреси й замок 🔒 в адресному рядку на обох вкладках.",
+    "Увійди в щоденник лише на справжньому сайті школи: школа.edu → «Щоденник».",
+    "Логін і пароль вигадані: надрукуй будь-які."
+  ],
+  start: { tabs: ["щоденник-школа.xyz", "школа.edu"] },
+  goals: [
+    { type: "submitted", form: "school-login", text: "Ти увійшов у щоденник на справжньому сайті школи", hint: "Перейди на вкладку школа.edu, відкрий «Щоденник» у меню сайту й увійди там." },
+    {
+      type: "notSubmitted",
+      form: "fake-login",
+      text: "На сайті-підробці ти не вводив пароль",
+      hint: "Адреса щоденник-школа.xyz і напис «Не захищено» — ознаки підробки, хоч сторінка схожа на шкільну. Натисни «Почати спочатку»."
+    }
+  ]
+}
+
+const findOnPage: Scenario = {
+  id: "g5-find",
+  grade: 5,
+  title: "Знайди на сторінці",
+  task: ["Відкрито довгу статтю про планети.", "Натисни Ctrl+F (або меню ⋮ → «Знайти на сторінці»), надрукуй «Марс» і натисни Enter.", "Прочитай підсвічений текст і дай відповідь на питання."],
+  start: { tabs: ["космос.edu/планети"], questions: [{ id: "moons", text: "Скільки супутників у Марса?", placeholder: "Число" }] },
+  goals: [
+    { type: "foundOnPage", words: ["марс"], url: "космос.edu/планети" },
+    { type: "answer", question: "moons", accept: ["2", "два", "2 супутники", "два супутники"], text: "Відповідь про супутники Марса правильна" }
+  ]
+}
+
+const finePrint: Scenario = {
+  id: "g5-zoom",
+  grade: 5,
+  title: "Дрібний шрифт",
+  task: [
+    "В оголошенні про екскурсію найважливіше написано дрібно.",
+    "Збільш масштаб сторінки до 150 %: Ctrl і + (або меню ⋮ → «+»).",
+    "Прочитай, о котрій годині збір, і запиши відповідь."
+  ],
+  start: { tabs: ["школа.edu/оголошення"], questions: [{ id: "time", text: "О котрій годині збір біля воріт школи?", placeholder: "Наприклад, 9:15" }] },
+  goals: [
+    { type: "zoom", min: 150 },
+    { type: "answer", question: "time", accept: ["8:30", "8.30", "08:30", "о 8:30", "8 30"], text: "Час збору правильний" }
+  ]
+}
+
 /** In the order of the lessons. */
 export const scenarios: ReadonlyArray<Scenario> = [
   links,
@@ -376,5 +426,8 @@ export const scenarios: ReadonlyArray<Scenario> = [
   photoAuthor,
   searchSchool,
   tabsOrder,
-  cleanHistory
+  cleanHistory,
+  lockInBar,
+  findOnPage,
+  finePrint
 ]

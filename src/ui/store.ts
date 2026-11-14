@@ -19,6 +19,8 @@ export interface UiState {
   readonly menu: Menu | null
   /** The star dialog is open. */
   readonly bookmarkDialog: boolean
+  /** The bar of «Знайти на сторінці» (Ctrl+F) is open. */
+  readonly findBar: boolean
   readonly message: string | null
   readonly results: ReadonlyArray<GoalResult> | null
   /** Grows on «Оновити», so the page plays its loading look again. */
@@ -34,6 +36,7 @@ export type UiAction =
   | { readonly type: "panel"; readonly panel: Panel | null }
   | { readonly type: "menu"; readonly menu: Menu | null }
   | { readonly type: "bookmarkDialog"; readonly open: boolean }
+  | { readonly type: "findBar"; readonly open: boolean }
   | { readonly type: "notify"; readonly message: string }
   | { readonly type: "dismiss" }
   | { readonly type: "check"; readonly goals: ReadonlyArray<Goal> }
@@ -46,6 +49,7 @@ export const initialUi = (web: Web, browser: BrowserState, ops: ReadonlyArray<Op
   panel: null,
   menu: null,
   bookmarkDialog: false,
+  findBar: false,
   message: null,
   results: null,
   reloads: 0,
@@ -100,6 +104,8 @@ export const reducer = (state: UiState, action: UiAction): UiState => {
       return { ...state, menu: action.menu }
     case "bookmarkDialog":
       return { ...state, bookmarkDialog: action.open, menu: null }
+    case "findBar":
+      return { ...state, findBar: action.open, menu: null }
     case "notify":
       return { ...state, message: action.message }
     case "dismiss":

@@ -24,6 +24,9 @@ type Step =
   | { readonly do: "download"; readonly file: string }
   | { readonly do: "answer"; readonly question: string; readonly text: string }
   | { readonly do: "deleteDownload"; readonly file: string }
+  | { readonly do: "submit"; readonly form: string }
+  | { readonly do: "find"; readonly text: string }
+  | { readonly do: "zoom"; readonly level: number }
 
 const tabWith = (web: Web, state: BrowserState, url: Url): number => {
   const want = canonicalUrl(web.map, url)
@@ -66,6 +69,12 @@ const toOp = (web: Web, state: BrowserState, step: Step): Op => {
       return { op: "download", file: step.file }
     case "answer":
       return { op: "answer", question: step.question, text: step.text }
+    case "submit":
+      return { op: "submitForm", form: step.form }
+    case "find":
+      return { op: "find", text: step.text }
+    case "zoom":
+      return { op: "zoom", level: step.level }
     case "deleteDownload": {
       const item = state.downloads.find((d) => d.file === step.file)
       if (!item) throw new Error(`Помилка в розв'язку: не завантажено ${step.file}`)
@@ -131,7 +140,22 @@ const SOLUTIONS: Readonly<Record<string, ReadonlyArray<Step>>> = {
     { do: "go", url: "словник.edu", how: "typed" },
     { do: "close", url: "словник.edu" }
   ],
-  "g5-clean-history": [{ do: "forget", url: "космос.edu/ракети" }, { do: "clearHistory" }]
+  "g5-clean-history": [{ do: "forget", url: "космос.edu/ракети" }, { do: "clearHistory" }],
+  "g5-lock": [
+    { do: "switch", url: "школа.edu" },
+    { do: "go", url: "школа.edu/щоденник", how: "link" },
+    { do: "submit", form: "school-login" }
+  ],
+  "g5-find": [
+    { do: "find", text: "Марс" },
+    { do: "answer", question: "moons", text: "2" }
+  ],
+  "g5-zoom": [
+    { do: "zoom", level: 110 },
+    { do: "zoom", level: 125 },
+    { do: "zoom", level: 150 },
+    { do: "answer", question: "time", text: "8:30" }
+  ]
 }
 
 /** The reference log of a scenario. Throws when the scenario has no solution or the solution is broken. */

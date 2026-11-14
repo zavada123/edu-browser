@@ -34,6 +34,8 @@ It follows the same model as [edu-desktop](https://github.com/zavada123/edu-desk
 - **Safety lessons:** popup windows with a tempting button and a small ✕, a chat where a stranger asks for a password (with «Поскаржитися»), a bait site with a form for personal data, downloads with an antivirus warning, and the 🙋 «Покликати дорослого» button. Forms send nothing and nothing the student types is kept: only the press is recorded.
 - **Made-up sites as data:** a page is a list of blocks (heading, text with links, photo with author, links, list, table, banner, search). No HTML from data, no iframes, no network.
 - **Learning with the internet:** a school dictionary, two encyclopedias that give different numbers, a photo gallery where every photo has an author and a licence and can be downloaded, and questions in the task card the student answers with what they found.
+- **Find on the page and zoom:** «Знайти на сторінці» (Ctrl+F, or the ⋮ menu) highlights every match and counts them; the page zooms from 50 % to 200 % (Ctrl++, Ctrl+−, Ctrl+0, or the ⋮ menu), with a badge that resets it.
+- **The lock in the address bar:** a real school diary on `https` next to a copy with the same look on an `http` address with a strange name. A password field hides the letters.
 - **Large mode** for grades 3–4, a **phone layout** with a tab list, and **full screen**.
 - **Tamper-proof grading:** the server replays the log and checks every step was possible (a "link" step must be a link on that page, a "history" step must be in history).
 
@@ -44,7 +46,7 @@ It follows the same model as [edu-desktop](https://github.com/zavada123/edu-desk
 | 3 | inf3-09 | Мандрівка посиланнями · Назад і вперед · Адреса казок · Сайт чи сторінка? |
 | 3 | inf3-10 | Котик просить пароль · Твій приз — телефон! · Безпечний чи підозрілий? · Файл гри з вірусом |
 | 4 | inf3-11 | Перша закладка · Папка закладок · Знайди в історії · Як пишеться? · Перевір у двох джерелах · Чиє фото? |
-| 5 | — | Пошук за ключовими словами · Вкладки до ладу · Прибери за собою |
+| 5 | — | Пошук за ключовими словами · Вкладки до ладу · Прибери за собою · Замок у рядку · Знайди на сторінці · Дрібний шрифт |
 
 ## Installation
 
@@ -115,7 +117,7 @@ A log is limited to 500 steps, 20 tabs, 100 bookmarks, 20 folders and 50 downloa
 
 ### Steps
 
-`navigate` (with `how`: `typed`, `link`, `bookmark`, `history`, `home`), `back`, `forward`, `reload`, `newTab`, `closeTab`, `switchTab`, `addBookmark`, `renameBookmark`, `moveBookmark`, `deleteBookmark`, `addFolder`, `deleteHistory`, `clearHistory`, `submitForm`, `report`, `callAdult`, `closePopup`, `acceptPopup`, `download`, `deleteDownload`, `openDownload`, `answer`.
+`navigate` (with `how`: `typed`, `link`, `bookmark`, `history`, `home`), `back`, `forward`, `reload`, `newTab`, `closeTab`, `switchTab`, `addBookmark`, `renameBookmark`, `moveBookmark`, `deleteBookmark`, `addFolder`, `deleteHistory`, `clearHistory`, `submitForm`, `report`, `callAdult`, `closePopup`, `acceptPopup`, `download`, `deleteDownload`, `openDownload`, `find` (the words searched on the page in front), `zoom` (`level`: 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200), `answer`.
 
 While a popup is open, only its buttons and `callAdult` are possible, as on the screen.
 
@@ -138,6 +140,8 @@ Every goal accepts its own `text` and a `hint` shown when it is not met.
 | `submitted` / `notSubmitted` | The form or chat with this id was / was not sent |
 | `popupClosed` | The popup was closed without its tempting button |
 | `downloaded` / `downloadDeleted` / `notOpened` | The file was downloaded / deleted / never opened |
+| `foundOnPage` | The student searched the page for these words (optionally on this page) |
+| `zoom` | The page zoom is at least `min` and/or at most `max` per cent |
 | `answer` | The answer to a question of the task (`start.questions`) is one of `accept`; case, extra spaces, quotes, stress marks and apostrophe kinds do not matter |
 
 ## Development

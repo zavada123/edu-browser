@@ -28,6 +28,8 @@ export interface UiState {
     readonly menu: Menu | null;
     /** The star dialog is open. */
     readonly bookmarkDialog: boolean;
+    /** The bar of «Знайти на сторінці» (Ctrl+F) is open. */
+    readonly findBar: boolean;
     readonly message: string | null;
     readonly results: ReadonlyArray<GoalResult> | null;
     /** Grows on «Оновити», so the page plays its loading look again. */
@@ -51,6 +53,9 @@ export type UiAction = {
     readonly menu: Menu | null;
 } | {
     readonly type: "bookmarkDialog";
+    readonly open: boolean;
+} | {
+    readonly type: "findBar";
     readonly open: boolean;
 } | {
     readonly type: "notify";

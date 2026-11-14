@@ -19,6 +19,10 @@ export type Goal = (
   /** The student searched on the search site, and the query held every one of these words. */
   | { readonly type: "searched"; readonly words: ReadonlyArray<string> }
   | { readonly type: "notVisited"; readonly url: Url }
+  /** The student searched on a page with Ctrl+F, and the search held every one of these words. Optional: on this page. */
+  | { readonly type: "foundOnPage"; readonly words: ReadonlyArray<string>; readonly url?: Url }
+  /** The page zoom at the end is in this range, in percent: «збільш масштаб до 150 %». */
+  | { readonly type: "zoom"; readonly min?: number; readonly max?: number }
   | { readonly type: "used"; readonly action: Action; readonly times?: number }
   | { readonly type: "bookmark"; readonly url: Url; readonly folder?: string; readonly title?: string }
   | { readonly type: "noBookmark"; readonly url: Url }
@@ -91,7 +95,9 @@ const ACTION_TEXT: Readonly<Record<Action, string>> = {
   deleteHistory: "Із історії видалено запис",
   clearHistory: "Історію очищено",
   callAdult: "Ти покликав дорослого",
-  report: "Ти поскаржився на повідомлення"
+  report: "Ти поскаржився на повідомлення",
+  find: "Ти шукав на сторінці (Ctrl+F)",
+  zoom: "Ти змінив масштаб сторінки"
 }
 
 /** Default wording of a goal for the task list. */
@@ -115,6 +121,14 @@ export const describeGoal = (web: Web, goal: Goal): string => {
       return `Ти шукав у пошуковику: ${goal.words.join(" ")}`
     case "notVisited":
       return `Ти не відкривав ${parseUrl(goal.url).path === "" ? `сайт ${goal.url}` : page(goal.url)}`
+    case "foundOnPage":
+      return `Ти шукав на сторінці${goal.url ? ` ${page(goal.url)}` : ""}: ${goal.words.join(" ")}`
+    case "zoom":
+      return goal.min !== undefined && goal.min > 100
+        ? `Масштаб сторінки не менше ${goal.min} %`
+        : goal.max !== undefined && goal.max <= 100
+          ? `Масштаб сторінки не більше ${goal.max} %`
+          : "Масштаб сторінки змінено правильно"
     case "used":
       return goal.times !== undefined && goal.times > 1 ? `${ACTION_TEXT[goal.action]} ${goal.times} рази` : ACTION_TEXT[goal.action]
     case "bookmark":
@@ -168,6 +182,10 @@ const defaultHint = (goal: Goal): string => {
       return "Відкрий пошук (домашня сторінка 🏠), надрукуй ключові слова в полі пошуку і натисни «Знайти»."
     case "notVisited":
       return "Цей сайт не варто було відкривати. Натисни «Почати спочатку» і спробуй інакше."
+    case "foundOnPage":
+      return "Натисни Ctrl+F (або меню ⋮ → «Знайти на сторінці»), надрукуй слово і натисни Enter: браузер підсвітить його на сторінці."
+    case "zoom":
+      return "Масштаб змінюють клавішами Ctrl і + (більше) або Ctrl і − (менше), або кнопками «−» і «+» у меню ⋮. Ctrl+0 повертає 100 %."
     case "used":
       return goal.action === "back"
         ? "Кнопка «Назад» — стрілка ← ліворуч від адресного рядка."
@@ -245,6 +263,13 @@ const isMet = (web: Web, state: BrowserState, goal: Goal): boolean => {
     }
     case "used":
       return (state.used[goal.action] ?? 0) >= (goal.times ?? 1)
+    case "foundOnPage":
+      return state.finds.some((f) => {
+        const text = f.text.toLocaleLowerCase("uk")
+        return (goal.url === undefined || f.url === url) && goal.words.every((w) => text.includes(w.toLocaleLowerCase("uk")))
+      })
+    case "zoom":
+      return (goal.min === undefined || state.zoom >= goal.min) && (goal.max === undefined || state.zoom <= goal.max)
     case "bookmark":
       return state.bookmarks.some(
         (b) => b.url === url && (goal.folder === undefined || b.folder === goal.folder) && (goal.title === undefined || sameText(b.title, goal.title))

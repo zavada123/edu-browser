@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react"
 import { allMet } from "../core/goals.ts"
-import { type Op, replay } from "../core/ops.ts"
+import { nextZoom, type Op, replay } from "../core/ops.ts"
 import { searchUrl } from "../core/sites.ts"
 import { activeTabOf, buildState, currentUrl, type Web } from "../core/state.ts"
 import type { Url } from "../core/url.ts"
@@ -8,6 +8,7 @@ import type { Scenario } from "../scenarios/types.ts"
 import { defaultWeb } from "../sites/index.ts"
 import { BookmarkBar, BookmarkDialog, BookmarksPanel } from "./Bookmarks.tsx"
 import { TabStrip, Toolbar } from "./Chrome.tsx"
+import { FindBar } from "./FindBar.tsx"
 import { useFullScreen } from "./fullscreen.ts"
 import { commandFor } from "./keys.ts"
 import { AntivirusDialog, DownloadsPanelBody, type PageActions, PopupWindow } from "./Interactive.tsx"
@@ -117,6 +118,7 @@ export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfC
       const command = commandFor({ key: e.key, code: e.code, ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey, alt: e.altKey })
       if (command === null) return
       if (command === "escape") {
+        if (state.findBar) return dispatch({ type: "findBar", open: false })
         if (state.menu || state.bookmarkDialog) dispatch({ type: "menu", menu: null })
         if (state.bookmarkDialog) dispatch({ type: "bookmarkDialog", open: false })
         else if (state.panel && !isTextField(e.target)) dispatch({ type: "panel", panel: null })
@@ -149,6 +151,15 @@ export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfC
           return tab && tab.index < tab.stack.length - 1 ? dispatch({ type: "op", op: { op: "forward" } }) : undefined
         case "reload":
           return dispatch({ type: "op", op: { op: "reload" } })
+        case "find":
+          return dispatch({ type: "findBar", open: true })
+        case "zoomIn":
+        case "zoomOut": {
+          const level = nextZoom(browser.zoom, command === "zoomIn" ? 1 : -1)
+          return level === browser.zoom ? undefined : dispatch({ type: "op", op: { op: "zoom", level } })
+        }
+        case "zoomReset":
+          return browser.zoom === 100 ? undefined : dispatch({ type: "op", op: { op: "zoom", level: 100 } })
       }
     }
     document.addEventListener("pointerdown", onPointerDown, true)
@@ -157,7 +168,7 @@ export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfC
       document.removeEventListener("pointerdown", onPointerDown, true)
       document.removeEventListener("keydown", onKeyDown)
     }
-  }, [browser, tab, url, state.menu, state.bookmarkDialog, state.panel])
+  }, [browser, tab, url, state.menu, state.bookmarkDialog, state.panel, state.findBar])
 
   const closePanel = () => dispatch({ type: "panel", panel: null })
 
@@ -172,9 +183,17 @@ export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfC
         <TabStrip web={web} browser={browser} dispatch={dispatch} />
         {tab && <Toolbar web={web} browser={browser} tab={tab} large={scenario.large === true} addressRef={addressRef} dispatch={dispatch} full={full} onFull={toggleFull} />}
         <BookmarkBar web={web} browser={browser} dispatch={dispatch} />
+        {state.findBar && (
+          <FindBar
+            pageRef={pageRef}
+            pageKey={`${browser.activeTab}|${url}|${state.reloads}|${state.resets}|${browser.zoom}`}
+            onSearch={(text) => dispatch({ type: "op", op: { op: "find", text } })}
+            onClose={() => dispatch({ type: "findBar", open: false })}
+          />
+        )}
         <div className="eb-body">
           <div className="eb-page" ref={pageRef}>
-            <div key={`${browser.activeTab}|${url}|${state.reloads}|${state.resets}`} className="eb-page-inner">
+            <div key={`${browser.activeTab}|${url}|${state.reloads}|${state.resets}`} className="eb-page-inner" style={browser.zoom === 100 ? undefined : { zoom: `${browser.zoom}%` }}>
               <PageView web={web} url={url} links={links} onSearch={onSearch} actions={actions} />
             </div>
           </div>

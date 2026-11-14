@@ -48,6 +48,11 @@ export type Block = {
     readonly type: "note";
     readonly text: string;
 }
+/** Small pale print, hard to read without zoom: «Збільш масштаб, щоб прочитати». */
+ | {
+    readonly type: "fine";
+    readonly text: string;
+}
 /**
  * A form that asks for something. It sends nothing anywhere: the trainer only records that the student
  * pressed the button, never what they typed.
@@ -58,6 +63,8 @@ export type Block = {
     readonly title: string;
     readonly fields: ReadonlyArray<string>;
     readonly button: string;
+    /** What the page says after the button. Default: a warning that strangers now know the data. */
+    readonly sent?: string;
 }
 /** A chat with scripted messages; the student can write, or report the writer to the site. */
  | {

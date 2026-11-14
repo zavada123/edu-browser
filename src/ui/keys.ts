@@ -7,7 +7,22 @@ export interface KeyPress {
   readonly alt: boolean
 }
 
-export type Command = "newTab" | "closeTab" | "nextTab" | "prevTab" | "history" | "bookmark" | "address" | "back" | "forward" | "reload" | "escape"
+export type Command =
+  | "newTab"
+  | "closeTab"
+  | "nextTab"
+  | "prevTab"
+  | "history"
+  | "bookmark"
+  | "address"
+  | "back"
+  | "forward"
+  | "reload"
+  | "escape"
+  | "find"
+  | "zoomIn"
+  | "zoomOut"
+  | "zoomReset"
 
 /**
  * The browser shortcuts from the textbooks. Letters are read from `code`, so they work in the Ukrainian
@@ -21,7 +36,19 @@ export const commandFor = (k: KeyPress): Command | null => {
   if (k.alt && !k.ctrl && k.key === "ArrowRight") return "forward"
   if (!k.ctrl || k.alt) return null
   if (k.key === "Tab") return k.shift ? "prevTab" : "nextTab"
+  if (k.key === "+") return "zoomIn"
   switch (k.code) {
+    case "KeyF":
+      return "find"
+    case "Equal":
+    case "NumpadAdd":
+      return "zoomIn"
+    case "Minus":
+    case "NumpadSubtract":
+      return "zoomOut"
+    case "Digit0":
+    case "Numpad0":
+      return "zoomReset"
     case "KeyT":
       return "newTab"
     case "KeyW":

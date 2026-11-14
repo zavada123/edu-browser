@@ -38,6 +38,18 @@ export type Goal = ({
 } | {
     readonly type: "notVisited";
     readonly url: Url;
+}
+/** The student searched on a page with Ctrl+F, and the search held every one of these words. Optional: on this page. */
+ | {
+    readonly type: "foundOnPage";
+    readonly words: ReadonlyArray<string>;
+    readonly url?: Url;
+}
+/** The page zoom at the end is in this range, in percent: «збільш масштаб до 150 %». */
+ | {
+    readonly type: "zoom";
+    readonly min?: number;
+    readonly max?: number;
 } | {
     readonly type: "used";
     readonly action: Action;

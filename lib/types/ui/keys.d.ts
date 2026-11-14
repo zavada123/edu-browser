@@ -6,7 +6,7 @@ export interface KeyPress {
     readonly shift: boolean;
     readonly alt: boolean;
 }
-export type Command = "newTab" | "closeTab" | "nextTab" | "prevTab" | "history" | "bookmark" | "address" | "back" | "forward" | "reload" | "escape";
+export type Command = "newTab" | "closeTab" | "nextTab" | "prevTab" | "history" | "bookmark" | "address" | "back" | "forward" | "reload" | "escape" | "find" | "zoomIn" | "zoomOut" | "zoomReset";
 /**
  * The browser shortcuts from the textbooks. Letters are read from `code`, so they work in the Ukrainian
  * layout too (Ctrl+Т is still Ctrl+T). The real browser keeps Ctrl+T and Ctrl+W for itself in most cases;

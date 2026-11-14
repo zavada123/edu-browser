@@ -115,6 +115,8 @@ const BlockView = ({ block, base, web, query, links, onSearch, actions }: BlockP
           <Text text={block.text} base={base} links={links} />
         </p>
       )
+    case "fine":
+      return <p className="eb-fine">{block.text}</p>
     case "photo":
       return (
         <figure className="eb-photo">
@@ -189,7 +191,7 @@ const BlockView = ({ block, base, web, query, links, onSearch, actions }: BlockP
     case "search":
       return <SearchBlock web={web} query={query} links={links} onSearch={onSearch} />
     case "form":
-      return <FormBlock id={block.id} title={block.title} fields={block.fields} button={block.button} actions={actions} />
+      return <FormBlock id={block.id} title={block.title} fields={block.fields} button={block.button} sentText={block.sent} actions={actions} />
     case "chat":
       return <ChatBlock id={block.id} title={block.title} messages={block.messages} reply={block.reply} actions={actions} />
     case "download":
