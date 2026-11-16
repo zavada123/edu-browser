@@ -5,6 +5,7 @@ export interface LinkHandlers {
     readonly openInNewTab: (url: Url) => void;
     readonly menu: (url: Url, x: number, y: number) => void;
 }
+declare const cancelPress: () => void;
 /**
  * Props for a link of a made-up page: a click follows it, Ctrl+click or the middle button opens it
  * in a new tab, the right button or a long press shows «Відкрити в новій вкладці».
@@ -16,6 +17,7 @@ export declare const linkProps: (url: Url, handlers: LinkHandlers) => {
     onContextMenu: (e: MouseEvent) => void;
     onPointerDown: (e: PointerEvent) => void;
     onPointerMove: (e: PointerEvent) => void;
-    onPointerUp: () => void;
-    onPointerCancel: () => void;
+    onPointerUp: typeof cancelPress;
+    onPointerCancel: typeof cancelPress;
 };
+export {};

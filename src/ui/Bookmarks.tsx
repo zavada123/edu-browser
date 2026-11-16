@@ -2,10 +2,17 @@ import { type FormEvent, useRef, useState } from "react"
 import type { Op } from "../core/ops.ts"
 import { iconOf, titleOf } from "../core/sites.ts"
 import { activeTabOf, type Bookmark, type BrowserState, currentUrl, type Web } from "../core/state.ts"
+import { Select, type SelectOption } from "./Select.tsx"
 import type { UiAction } from "./store.ts"
 
 const BAR = ""
 const NEW_FOLDER = "\u0000new"
+
+/** Where a bookmark can live: the bar itself or one of the folders. */
+const folderOptions = (folders: ReadonlyArray<string>): ReadonlyArray<SelectOption<string>> => [
+  { value: BAR, label: "Панель закладок" },
+  ...folders.map((f) => ({ value: f, label: `📁 ${f}` }))
+]
 
 /** The bar under the address bar: bookmarks of the bar itself, then the folders. */
 export const BookmarkBar = ({ web, browser, dispatch }: { readonly web: Web; readonly browser: BrowserState; readonly dispatch: (a: UiAction) => void }) => {
@@ -90,18 +97,15 @@ export const BookmarkDialog = ({ web, browser, dispatch }: { readonly web: Web; 
           <span>Назва</span>
           <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={60} autoFocus />
         </label>
-        <label>
+        <div className="eb-field">
           <span>Папка</span>
-          <select value={folder} onChange={(e) => setFolder(e.target.value)}>
-            <option value={BAR}>Панель закладок</option>
-            {browser.folders.map((f) => (
-              <option key={f} value={f}>
-                📁 {f}
-              </option>
-            ))}
-            <option value={NEW_FOLDER}>➕ Нова папка…</option>
-          </select>
-        </label>
+          <Select
+            ariaLabel="Папка"
+            value={folder}
+            options={[...folderOptions(browser.folders), { value: NEW_FOLDER, label: "➕ Нова папка…" }]}
+            onChange={setFolder}
+          />
+        </div>
         {folder === NEW_FOLDER && (
           <label>
             <span>Назва нової папки</span>
@@ -157,19 +161,13 @@ const BookmarkRow = ({ web, bookmark, folders, dispatch }: { readonly web: Web; 
           <span className="eb-row-url">{bookmark.url}</span>
         </button>
       )}
-      <select
+      <Select
         className="eb-row-folder"
         value={bookmark.folder}
-        aria-label={`Папка закладки «${bookmark.title}»`}
-        onChange={(e) => dispatch({ type: "op", op: { op: "moveBookmark", id: bookmark.id, folder: e.target.value } })}
-      >
-        <option value={BAR}>Панель закладок</option>
-        {folders.map((f) => (
-          <option key={f} value={f}>
-            📁 {f}
-          </option>
-        ))}
-      </select>
+        ariaLabel={`Папка закладки «${bookmark.title}»`}
+        options={folderOptions(folders)}
+        onChange={(folder) => dispatch({ type: "op", op: { op: "moveBookmark", id: bookmark.id, folder } })}
+      />
       <button type="button" className="eb-icon-btn" aria-label={`Перейменувати «${bookmark.title}»`} title="Перейменувати" onClick={() => {
           finished.current = false
           setTitle(bookmark.title)

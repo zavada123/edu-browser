@@ -13,6 +13,17 @@
   --eb-font: 14px;
   --eb-tool: 36px;
   --eb-task-w: 320px;
+  /* The site-styled dropdown (select.css) in the browser's colors. */
+  --edu-select-bg: #fff;
+  --edu-select-fg: var(--eb-text);
+  --edu-select-muted: var(--eb-muted);
+  --edu-select-line: var(--eb-line);
+  --edu-select-hover-line: #b9c3d1;
+  --edu-select-accent: var(--eb-accent);
+  --edu-select-active-bg: var(--eb-accent-soft);
+  --edu-select-active-fg: var(--eb-text);
+  --edu-select-height: 38px;
+  --edu-select-radius: 8px;
   container-type: inline-size;
   position: relative;
   width: 100%;
@@ -753,12 +764,10 @@
 
 .eb-row-folder {
   flex: none;
-  max-width: 110px;
-  height: 30px;
-  border: 1px solid var(--eb-line);
-  border-radius: 6px;
-  background: #fff;
-  font-size: 0.85em !important;
+  max-width: 130px;
+  font-size: 0.85em;
+  --edu-select-height: 30px;
+  --edu-select-radius: 6px;
 }
 
 .eb-btn {
@@ -848,18 +857,19 @@
   font-size: 1.1em;
 }
 
-.eb-dialog label {
+.eb-dialog label,
+.eb-dialog .eb-field {
   display: grid;
   gap: 4px;
 }
 
-.eb-dialog label span {
+.eb-dialog label span,
+.eb-dialog .eb-field > span {
   color: var(--eb-muted);
   font-size: 0.88em;
 }
 
-.eb-dialog input,
-.eb-dialog select {
+.eb-dialog input {
   height: 38px;
   padding: 0 10px;
   border: 1px solid var(--eb-line);
