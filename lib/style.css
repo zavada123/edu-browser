@@ -1074,15 +1074,6 @@
   font-size: 1.15em;
 }
 
-.eb-grade {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--eb-accent-soft);
-  color: #1d4ed8;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 .eb-task-hide {
   width: 32px;
   height: 32px;

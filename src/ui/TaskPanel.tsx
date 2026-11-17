@@ -29,7 +29,6 @@ export const TaskPanel = ({ scenario, state, open, onToggle, onReset, dispatch, 
   return (
     <div className={`eb-task ${open ? "is-open" : ""}`}>
       <div className="eb-task-head">
-        {scenario.grade > 0 && <span className="eb-grade">{scenario.grade} клас</span>}
         <h2>{scenario.title}</h2>
         <button type="button" className="eb-task-hide" aria-label="Сховати завдання" onClick={onToggle}>
           ✕
