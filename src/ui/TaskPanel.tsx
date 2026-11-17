@@ -2,6 +2,7 @@ import { allMet } from "../core/goals.ts"
 import type { Scenario } from "../scenarios/types.ts"
 import { Questions } from "./Questions.tsx"
 import type { UiAction, UiState } from "./store.ts"
+import { RichText } from "./RichText.tsx"
 
 interface Props {
   readonly scenario: Scenario
@@ -36,7 +37,9 @@ export const TaskPanel = ({ scenario, state, open, onToggle, onReset, dispatch, 
       </div>
       <ol className="eb-task-steps">
         {scenario.task.map((step) => (
-          <li key={step}>{step}</li>
+          <li key={step}>
+            <RichText text={step} />
+          </li>
         ))}
       </ol>
       <Questions key={state.resets} questions={state.browser.questions} answers={state.browser.answers} dispatch={dispatch} />
@@ -56,8 +59,12 @@ export const TaskPanel = ({ scenario, state, open, onToggle, onReset, dispatch, 
           <ul>
             {results.map((r) => (
               <li key={r.text} className={r.ok ? "is-ok" : "is-bad"}>
-                <span aria-hidden="true">{r.ok ? "✅" : "❌"}</span> {r.text}
-                {!r.ok && <small>{r.hint}</small>}
+                <span aria-hidden="true">{r.ok ? "✅" : "❌"}</span> <RichText text={r.text} />
+                {!r.ok && (
+                  <small>
+                    <RichText text={r.hint} />
+                  </small>
+                )}
               </li>
             ))}
           </ul>

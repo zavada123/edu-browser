@@ -95,7 +95,7 @@ describe("safety scenarios catch wrong choices", () => {
 
   test("taking the prize", () => {
     const wrong = failed("g3-prize-popup", [{ op: "acceptPopup", id: "prize" }, { op: "submitForm", form: "prize" }])
-    expect(wrong).toEqual(["Вікно закрито без «Забрати приз»", "Сайт-приманку не відкрито", "Ти не вводив жодних даних", "На екрані знову казка «Колобок»"])
+    expect(wrong).toEqual(["Вікно закрито без **Забрати приз**", "Сайт-приманку не відкрито", "Ти не вводив жодних даних", "На екрані знову казка «Колобок»"])
   })
 
   test("opening the advert or the .xyz site from search", () => {

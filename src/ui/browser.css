@@ -3,6 +3,7 @@
 .eb-root {
   --eb-accent: #2563eb;
   --eb-accent-soft: rgba(37, 99, 235, 0.14);
+  --rt-accent: #1d4ed8;
   --eb-text: #1b2230;
   --eb-muted: #5b6577;
   --eb-line: #d6dce5;

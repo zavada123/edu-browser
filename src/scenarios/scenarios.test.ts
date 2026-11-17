@@ -51,7 +51,7 @@ describe("wrong ways are caught", () => {
       { op: "navigate", url: "космос.edu/сонце", how: "link" },
       { op: "navigate", url: "космос.edu/місяць", how: "link" }
     ]
-    expect(failed("g3-back-forward", ops)).toEqual(["Ти повернувся на «Місяць» кнопкою «Назад»"])
+    expect(failed("g3-back-forward", ops)).toEqual(["Ти повернувся на «Місяць» кнопкою **Назад**"])
   })
 
   test("clicking the tile on the new-tab page is not typing", () => {
@@ -59,7 +59,7 @@ describe("wrong ways are caught", () => {
       { op: "navigate", url: "казки.edu", how: "link" },
       { op: "navigate", url: "казки.edu/рукавичка", how: "link" }
     ]
-    expect(failed("g3-type-address", ops)).toEqual(["Адресу казки.edu надруковано в адресному рядку"])
+    expect(failed("g3-type-address", ops)).toEqual(["Адресу `казки.edu` надруковано в адресному рядку"])
   })
 
   test("a bookmark on the bar instead of the folder", () => {
