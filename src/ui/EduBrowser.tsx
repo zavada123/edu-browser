@@ -18,6 +18,7 @@ import { ContextMenu, HistoryPanel, SidePanel, TabsPanel } from "./Panels.tsx"
 import { initialUi, reducer, type UiState } from "./store.ts"
 import { type NextExercise, TaskPanel } from "./TaskPanel.tsx"
 import "./browser.css"
+import "./rich-text.css"
 
 const MESSAGE_MS = 4_000
 

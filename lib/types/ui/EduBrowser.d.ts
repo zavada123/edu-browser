@@ -3,6 +3,7 @@ import { type Web } from "../core/state.ts";
 import type { Scenario } from "../scenarios/types.ts";
 import { type NextExercise } from "./TaskPanel.tsx";
 import "./browser.css";
+import "./rich-text.css";
 interface Props {
     /** To show another scenario, give the component a new `key`, for example the scenario id. */
     readonly scenario: Scenario;
