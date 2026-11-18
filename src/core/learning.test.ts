@@ -83,6 +83,6 @@ describe("learning scenarios catch wrong answers", () => {
       { op: "answer", question: "title", text: "Поле соняшників" },
       { op: "answer", question: "site", text: "https://фото-природа.edu" }
     ]
-    expect(failed("g4-photo-author", ops)).toEqual(["Фото бджоли завантажено", "Автора записано правильно", "Назву фото записано правильно"])
+    expect(failed("g4-photo-author", ops)).toEqual(["Фото «бджола.jpg» завантажено", "Автора записано правильно", "Назву фото записано правильно"])
   })
 })
