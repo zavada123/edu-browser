@@ -95,13 +95,13 @@ describe("safety scenarios catch wrong choices", () => {
 
   test("taking the prize", () => {
     const wrong = failed("g3-prize-popup", [{ op: "acceptPopup", id: "prize" }, { op: "submitForm", form: "prize" }])
-    expect(wrong).toEqual(["Вікно закрито без **Забрати приз**", "Сайт-приманку не відкрито", "Ти не вводив жодних даних", "На екрані знову казка «Колобок»"])
+    expect(wrong).toEqual(["Вікно закрито без **Забрати приз**", "Сайт-приманку `приз-телефон.win` не відкрито", "Ти не вводив жодних даних", "На екрані знову казка «Колобок»"])
   })
 
   test("opening the advert or the .xyz site from search", () => {
     expect(failed("g3-safe-result", [{ op: "navigate", url: "приз-телефон.win", how: "link" }])).toHaveLength(2)
     expect(failed("g3-safe-result", [{ op: "navigate", url: "казки-безкоштовно.xyz", how: "link" }, { op: "back" }, { op: "navigate", url: "казки.edu/колобок", how: "link" }])).toEqual([
-      "Підозрілий сайт .xyz не відкрито"
+      "Підозрілий сайт `казки-безкоштовно.xyz` не відкрито"
     ])
   })
 
@@ -109,6 +109,6 @@ describe("safety scenarios catch wrong choices", () => {
     const ops: Op[] = [{ op: "download", file: "супер-гонки.exe" }]
     const s = run(buildState(web, { tabs: ["безкоштовні-ігри.xyz"] }), ...ops)
     const id = s.downloads[0]?.id ?? 0
-    expect(failed("g3-virus-file", [...ops, { op: "openDownload", id }, { op: "callAdult" }])).toEqual(["Файл із вірусом видалено", "Файл із вірусом не відкривали"])
+    expect(failed("g3-virus-file", [...ops, { op: "openDownload", id }, { op: "callAdult" }])).toEqual(["Файл «супер-гонки.exe» видалено", "Файл «супер-гонки.exe» не відкривали"])
   })
 })
