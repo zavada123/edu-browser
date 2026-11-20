@@ -41,6 +41,12 @@ interface Props {
   readonly next?: NextExercise
   /** The made-up sites. Default: every built-in site. */
   readonly web?: Web
+  /**
+   * Each new positive value opens the trainer in full screen, on mount too; `0` leaves it as the student set it.
+   * Browsers give their own full screen only during a click, so the page also calls
+   * `document.documentElement.requestFullscreen()` in the click that asks for it.
+   */
+  readonly openFullScreen?: number
 }
 
 const startUi = (web: Web, scenario: Scenario, ops: ReadonlyArray<Op>): UiState => {
@@ -50,10 +56,10 @@ const startUi = (web: Web, scenario: Scenario, ops: ReadonlyArray<Op>): UiState 
 }
 
 /** The whole trainer for one scenario: a browser window with made-up sites and the task card. */
-export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfCheck = true, next, web = defaultWeb }: Props) => {
+export const EduBrowser = ({ scenario, onCheck, onChange, initialOps = [], selfCheck = true, next, web = defaultWeb, openFullScreen = 0 }: Props) => {
   const [state, dispatch] = useReducer(reducer, null, () => startUi(web, scenario, initialOps))
   const [taskOpen, setTaskOpen] = useState(true)
-  const { full, toggle: toggleFull, handOver } = useFullScreen()
+  const { full, toggle: toggleFull, handOver } = useFullScreen(openFullScreen)
   const addressRef = useRef<HTMLInputElement>(null)
   const pageRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)

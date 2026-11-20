@@ -19,7 +19,13 @@ interface Props {
     readonly next?: NextExercise;
     /** The made-up sites. Default: every built-in site. */
     readonly web?: Web;
+    /**
+     * Each new positive value opens the trainer in full screen, on mount too; `0` leaves it as the student set it.
+     * Browsers give their own full screen only during a click, so the page also calls
+     * `document.documentElement.requestFullscreen()` in the click that asks for it.
+     */
+    readonly openFullScreen?: number;
 }
 /** The whole trainer for one scenario: a browser window with made-up sites and the task card. */
-export declare const EduBrowser: ({ scenario, onCheck, onChange, initialOps, selfCheck, next, web }: Props) => import("react").JSX.Element;
+export declare const EduBrowser: ({ scenario, onCheck, onChange, initialOps, selfCheck, next, web, openFullScreen }: Props) => import("react").JSX.Element;
 export {};
