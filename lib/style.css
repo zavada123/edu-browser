@@ -1082,12 +1082,37 @@
   background: transparent;
 }
 
+/* Numbered steps: the page around the trainer can reset list styles, so the numbers are drawn here. */
 .eb-task-steps {
-  padding-left: 20px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  counter-reset: eb-step;
 }
 
 .eb-task-steps li {
-  margin-bottom: 6px;
+  position: relative;
+  margin-bottom: 8px;
+  padding-left: 32px;
+  counter-increment: eb-step;
+}
+
+.eb-task-steps li::before {
+  content: counter(eb-step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--eb-accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .eb-task-actions {
@@ -1753,7 +1778,7 @@
 }
 
 .rt-name {
-  padding: 0 0.2em;
+  padding: 0 0.15em;
   border-radius: 4px;
   background: var(--rt-name-bg, rgba(250, 204, 21, 0.35));
   color: var(--rt-name, #1b2230);
